@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
+  <!-- Background: green gradient -->
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#059669"/>
+      <stop offset="100%" stop-color="#047857"/>
+    </linearGradient>
+  </defs>
+  <rect width="64" height="64" rx="12" fill="url(#bg)"/>
+
+  <!-- Heart icon (simbol kesehatan) -->
+  <path d="M32 50 L20 38 C16 34 16 28 20 24 C24 20 30 20 32 24 C34 20 40 20 44 24 C48 28 48 34 44 38 Z"
+        fill="white" opacity="0.95"/>
+
+  <!-- Plus sign (simbol medis) -->
+  <rect x="29" y="30" width="6" height="14" fill="#059669" rx="1"/>
+  <rect x="26" y="33" width="12" height="6" fill="#059669" rx="1"/>
+</svg>

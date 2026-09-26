@@ -1,0 +1,614 @@
+<!DOCTYPE html>
+<!--
+  SIMANDAKES - Sistem Informasi dan Manajemen SDM Kesehatan
+  Versi modular (dipecah dari file monolitik asli)
+
+  Arsitektur:
+    - Frontend: GitHub Pages (static hosting, gratis)
+    - Backend : Nhost (Postgres + Hasura GraphQL + Auth + Storage)
+
+  Struktur folder:
+    frontend/
+      index.html              <-- file ini (entry point)
+      css/                    <-- 12 file CSS modular
+      js/                     <-- 14 modul JavaScript
+      partials/               <-- HTML partials (landing, login, dashboard)
+      assets/                 <-- gambar, favicon, dll
+    backend/
+      migrations/             <-- schema SQL Postgres untuk Nhost
+      metadata/               <-- Hasura metadata (permissions, relationships)
+      functions/              <-- Nhost serverless functions (jika perlu)
+-->
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="SIMANDAKES - Sistem Informasi dan Manajemen SDM Kesehatan">
+    <meta name="theme-color" content="#059669">
+    <title>SIMANDAKES - Sistem Informasi dan Manajemen SDM Kesehatan</title>
+
+    <!-- Favicon (opsional, taruh di /assets/) -->
+    <link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
+
+    <!-- ===== CSS MODULAR ===== -->
+    <!-- Urutan PENTING: base → utilities → components → forms/tables → pages -->
+    <link rel="stylesheet" href="css/base.css">
+    <link rel="stylesheet" href="css/utilities.css">
+    <link rel="stylesheet" href="css/components.css">
+    <link rel="stylesheet" href="css/forms.css">
+    <link rel="stylesheet" href="css/tables.css">
+    <link rel="stylesheet" href="css/landing.css">
+    <link rel="stylesheet" href="css/dashboard.css">
+    <link rel="stylesheet" href="css/inovash.css">
+    <link rel="stylesheet" href="css/pelayanan.css">
+    <link rel="stylesheet" href="css/institusi.css">
+    <link rel="stylesheet" href="css/modals.css">
+    <link rel="stylesheet" href="css/admin.css">
+</head>
+<body>
+
+    <!-- ===== PARTIAL: LANDING PAGE (file: partials/landing.html) ===== -->
+<!-- ==================== LANDING PAGE ==================== -->
+<div id="landingPage" class="landing-page">
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="navbar-inner">
+            <div class="logo">
+                <div class="logo-icon">
+                    <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
+                </div>
+                <span class="logo-text">SIMANDAKES</span>
+            </div>
+            <ul class="nav-links">
+                <li><a href="#fitur">Fitur</a></li>
+                <li><a href="#layanan">Layanan</a></li>
+                <li><a href="#tentang">Tentang</a></li>
+            </ul>
+            <button class="btn btn-primary" onclick="showDashboard()">Masuk ke Dashboard</button>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="container">
+            <div class="hero-grid">
+                <div class="hero-content">
+                    <div class="hero-badge">
+                        <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24"><path d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+                        Platform SDM Kesehatan Terpadu
+                    </div>
+                    <h1 class="hero-title">
+                        Sistem Informasi dan Manajemen<br/>
+                        <span>SDM Kesehatan</span>
+                    </h1>
+                    <p class="hero-subtitle">
+                        SIMANDAKES adalah platform digital terintegrasi untuk mengelola informasi tenaga kesehatan di Indonesia. Memudahkan pencarian praktisi kesehatan terpercaya dan manajemen data yang efisien.
+                    </p>
+                    <div class="hero-buttons">
+                        <button class="btn btn-primary btn-lg" onclick="showDashboard()">
+                            Mulai Sekarang
+                            <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                        </button>
+                        <button class="btn btn-outline btn-lg">Pelajari Lebih Lanjut</button>
+                    </div>
+                    <div class="hero-stats">
+                        <div class="stat-item">
+                            <h3>10K+</h3>
+                            <p>Tenaga Kesehatan</p>
+                        </div>
+                        <div class="stat-item">
+                            <h3>500+</h3>
+                            <p>Fasilitas Kesehatan</p>
+                        </div>
+                        <div class="stat-item">
+                            <h3>34</h3>
+                            <p>Provinsi Terjangkau</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="hero-preview">
+                    <div class="preview-header">
+                        <strong>Dashboard Ringkasan</strong>
+                        <span class="badge badge-success">Live</span>
+                    </div>
+                    <div class="preview-cards">
+                        <div class="mini-card mini-card-blue">
+                            <div class="mini-card-icon bg-blue-500" style="color:white;">
+                                <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+                            </div>
+                            <strong>Dokter Aktif</strong>
+                            <p style="font-size:22px;font-weight:700;color:#1e40af;margin-top:4px;" id="heroDokterCount">2</p>
+                        </div>
+                        <div class="mini-card mini-card-pink">
+                            <div class="mini-card-icon bg-pink-500" style="color:white;">
+                                <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>
+                            </div>
+                            <strong>Bidan Aktif</strong>
+                            <p style="font-size:22px;font-weight:700;color:#be185d;margin-top:4px;" id="heroBidanCount">2</p>
+                        </div>
+                        <div class="mini-card mini-card-purple">
+                            <div class="mini-card-icon bg-purple-500" style="color:white;">
+                                <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                            </div>
+                            <strong>Perawat Aktif</strong>
+                            <p style="font-size:22px;font-weight:700;color:#7c3aed;margin-top:4px;" id="heroPerawatCount">2</p>
+                        </div>
+                        <div class="mini-card mini-card-green">
+                            <div class="mini-card-icon bg-green-500" style="color:white;">
+                                <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+                            </div>
+                            <strong>Total Aktif</strong>
+                            <p style="font-size:22px;font-weight:700;color:#166534;margin-top:4px;" id="heroTotalCount">6</p>
+                        </div>
+                    </div>
+                    <div class="preview-list-item">
+                        <div class="avatar avatar-sm" style="background:#dbeafe;color:#1e40af;">AF</div>
+                        <div style="flex:1;"><strong style="font-size:14px;">Dr. Ahmad Fauzi</strong><p style="font-size:12px;color:#6b7280;">Sp.PD - Penyakit Dalam</p></div>
+                        <svg width="20" height="20" fill="#22c55e" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>
+                    </div>
+                    <div class="preview-list-item">
+                        <div class="avatar avatar-sm" style="background:#fce7f3;color:#be185d;">AP</div>
+                        <div style="flex:1;"><strong style="font-size:14px;">Bidan Aisyah Putri</strong><p style="font-size:12px;color:#6b7280;">S.Keb - Kebidanan</p></div>
+                        <svg width="20" height="20" fill="#22c55e" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section class="features-section" id="fitur">
+        <div class="container">
+            <div class="section-header">
+                <span class="badge badge-success mb-4">Fitur Unggulan</span>
+                <h2>Solusi Lengkap untuk Manajemen SDM Kesehatan</h2>
+                <p>Platform yang dirancang khusus untuk memenuhi kebutuhan pengelolaan data tenaga kesehatan Indonesia</p>
+            </div>
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-icon" style="background:#eff6ff;">
+                        <svg width="28" height="28" fill="none" stroke="#2563eb" stroke-width="2" viewBox="0 0 24 24"><path d="M18 20V10M12 20V4M6 20v-6"/></svg>
+                    </div>
+                    <h3>InovDash</h3>
+                    <p>Dashboard inovatif dengan visualisasi data real-time dan analitik canggih</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon" style="background:#f5f3ff;">
+                        <svg width="28" height="28" fill="none" stroke="#7c3aed" stroke-width="2" viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="23" y1="11" x2="17" y2="11"/></svg>
+                    </div>
+                    <h3>Named</h3>
+                    <p>Sistem manajemen data nakes terintegrasi dengan validasi otomatis</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon" style="background:#ecfdf5;">
+                        <svg width="28" height="28" fill="none" stroke="#059669" stroke-width="2" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                    </div>
+                    <h3>Nakes Directory</h3>
+                    <p>Database lengkap tenaga kesehatan yang dapat diakses publik</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon" style="background:#fff7ed;">
+                        <svg width="28" height="28" fill="none" stroke="#f97316" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+                    </div>
+                    <h3>Pencarian Cerdas</h3>
+                    <p>Cari dokter, bidan, perawat berdasarkan lokasi dan spesialisasi</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon" style="background:#f0fdfa;">
+                        <svg width="28" height="28" fill="none" stroke="#14b8a6" stroke-width="2" viewBox="0 0 24 24"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/></svg>
+                    </div>
+                    <h3>Google Sheets Integration</h3>
+                    <p>Integrasi seamless dengan Google Sheets untuk pengelolaan data mudah</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon" style="background:#fef2f2;">
+                        <svg width="28" height="28" fill="none" stroke="#ef4444" stroke-width="2" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                    </div>
+                    <h3>Keamanan Berlapis</h3>
+                    <p>Sistem akses multi-level dengan enkripsi end-to-end</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Services Section -->
+    <section class="services-section" id="layanan">
+        <div class="container">
+            <div class="section-header">
+                <span class="badge badge-info mb-4">Layanan Kami</span>
+                <h2>Layanan Pencarian Praktisi Kesehatan</h2>
+                <p>Temukan tenaga kesehatan profesional yang terverifikasi di sekitar Anda</p>
+            </div>
+            <div class="services-grid">
+                <div class="service-card blue" onclick="showDashboard(); navigateTo('cari-dokter')">
+                    <div class="service-icon" style="background:#eff6ff;">
+                        <svg width="28" height="28" fill="none" stroke="#2563eb" stroke-width="2" viewBox="0 0 24 24"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+                    </div>
+                    <h3>Cari Dokter</h3>
+                    <p>Temukan dokter sesuai spesialisasi</p>
+                </div>
+                <div class="service-card pink" onclick="showDashboard(); navigateTo('cari-bidan')">
+                    <div class="service-icon" style="background:#fce7f3;">
+                        <svg width="28" height="28" fill="none" stroke="#ec4899" stroke-width="2" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2z"/><path d="M12 8v4l3 3"/></svg>
+                    </div>
+                    <h3>Cari Bidan</h3>
+                    <p>Layanan kebidanan profesional</p>
+                </div>
+                <div class="service-card purple" onclick="showDashboard(); navigateTo('cari-perawat')">
+                    <div class="service-icon" style="background:#f3e8ff;">
+                        <svg width="28" height="28" fill="none" stroke="#a855f7" stroke-width="2" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                    </div>
+                    <h3>Cari Perawat</h3>
+                    <p>Perawat terlatih profesional</p>
+                </div>
+                <div class="service-card green" onclick="showDashboard(); navigateTo('cari-praktik')">
+                    <div class="service-icon" style="background:#d1fae5;">
+                        <svg width="28" height="28" fill="none" stroke="#059669" stroke-width="2" viewBox="0 0 24 24"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"/></svg>
+                    </div>
+                    <h3>Cari Praktik Nakes</h3>
+                    <p>Informasi tempat praktik nakes</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- About Section -->
+    <section class="about-section" id="tentang">
+        <div class="container">
+            <div class="about-grid">
+                <div class="about-content">
+                    <span class="badge badge-success mb-4">Tentang Kami</span>
+                    <h2 style="font-size:36px;font-weight:700;color:#111827;margin-bottom:16px;">Meningkatkan Akses Layanan Kesehatan Berkualitas</h2>
+                    <p style="font-size:18px;color:#6b7280;line-height:1.7;">SIMANDAKES hadir sebagai solusi digital untuk menghubungkan masyarakat dengan tenaga kesehatan profesional yang terverifikasi.</p>
+                    
+                    <div class="about-list">
+                        <div class="about-item">
+                            <div class="about-item-icon" style="background:#d1fae5;">
+                                <svg width="20" height="20" fill="none" stroke="#059669" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>
+                            </div>
+                            <div>
+                                <h4>Misi Utama</h4>
+                                <p>Menyediakan data akurat dan terkini tentang tenaga kesehatan Indonesia</p>
+                            </div>
+                        </div>
+                        <div class="about-item">
+                            <div class="about-item-icon" style="background:#dbeafe;">
+                                <svg width="20" height="20" fill="none" stroke="#2563eb" stroke-width="2" viewBox="0 0 24 24"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>
+                            </div>
+                            <div>
+                                <h4>Visi</h4>
+                                <p>Menjadi platform terdepan dalam manajemen SDM kesehatan digital</p>
+                            </div>
+                        </div>
+                        <div class="about-item">
+                            <div class="about-item-icon" style="background:#f3e8ff;">
+                                <svg width="20" height="20" fill="none" stroke="#7c3aed" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="8" r="7"/><polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"/></svg>
+                            </div>
+                            <div>
+                                <h4>Standar Kualitas</h4>
+                                <p>Data tervalidasi dari sumber resmi dan terpercaya</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="about-cards">
+                    <div class="about-mini-card" style="background:linear-gradient(135deg,#059669,#0d9488);">
+                        <svg width="40" height="40" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" style="margin:0 auto 8px;"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg>
+                        <h3>STR</h3>
+                        <p>Teregistrasi</p>
+                    </div>
+                    <div class="about-mini-card" style="background:linear-gradient(135deg,#2563eb,#1d4ed8);">
+                        <svg width="40" height="40" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" style="margin:0 auto 8px;"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+                        <h3>SIP</h3>
+                        <p>Berizin Resmi</p>
+                    </div>
+                    <div class="about-mini-card" style="background:linear-gradient(135deg,#a855f7,#9333ea);">
+                        <svg width="40" height="40" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" style="margin:0 auto 8px;"><rect x="4" y="2" width="16" height="20" rx="2"/><path d="M9 22v-4h6v4"/><path d="M8 6h.01M16 6h.01M12 6h.01M12 10h.01M12 14h.01M16 10h.01M16 14h.01M8 10h.01M8 14h.01"/></svg>
+                        <h3>Faskes</h3>
+                        <p>Terdaftar</p>
+                    </div>
+                    <div class="about-mini-card" style="background:linear-gradient(135deg,#f97316,#ea580c);">
+                        <svg width="40" height="40" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" style="margin:0 auto 8px;"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                        <h3>24/7</h3>
+                        <p>Akses Online</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA Section -->
+    <section class="cta-section">
+        <div class="container">
+            <h2>Siap Memulai?</h2>
+            <p>Bergabunglah dengan ribuan fasilitas kesehatan yang sudah menggunakan SIMANDAKES</p>
+            <div class="cta-buttons">
+                <button class="btn btn-white btn-lg" onclick="showDashboard()">
+                    Buka Dashboard
+                    <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                </button>
+                <button class="btn btn-outline-white btn-lg">Hubungi Kami</button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-grid">
+                <div>
+                    <div class="footer-logo">
+                        <div class="logo-icon">
+                            <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
+                        </div>
+                        <span>SIMANDAKES</span>
+                    </div>
+                    <p style="max-width:320px;">Sistem Informasi dan Manajemen Sumber Daya Manusia Kesehatan untuk Indonesia yang lebih sehat.</p>
+                    <div class="footer-social">
+                        <div class="social-icon">
+                            <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+                        </div>
+                        <div class="social-icon">
+                            <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+                        </div>
+                        <div class="social-icon">
+                            <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                        </div>
+                    </div>
+                </div>
+                <div class="footer-links">
+                    <h4>Layanan</h4>
+                    <ul>
+                        <li><a href="#">Cari Dokter</a></li>
+                        <li><a href="#">Cari Bidan</a></li>
+                        <li><a href="#">Cari Perawat</a></li>
+                        <li><a href="#">Info Praktik</a></li>
+                    </ul>
+                </div>
+                <div class="footer-links">
+                    <h4>Kontak</h4>
+                    <ul>
+                        <li>(021) 1234-5678</li>
+                        <li>info@simandakes.go.id</li>
+                        <li>Jakarta, Indonesia</li>
+                        <li>Senin-Jumat, 08.00-16.00</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2024 SIMANDAKES. Hak Cipta Dilindungi.</p>
+                <div style="display:flex;gap:24px;">
+                    <a href="#" style="color:#9ca3af;text-decoration:none;">Kebijakan Privasi</a>
+                    <a href="#" style="color:#9ca3af;text-decoration:none;">Syarat & Ketentuan</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+</div>
+
+    <!-- ===== PARTIAL: LOGIN PAGE (file: partials/login.html) ===== -->
+<!-- ==================== LOGIN PAGE ==================== -->
+<div id="loginPage" class="login-page hidden">
+    <div class="login-card">
+        <div class="login-header">
+            <div class="login-icon">
+                <svg width="32" height="32" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+            </div>
+            <h2 style="font-size:24px;font-weight:700;color:#111827;">Login Panel Admin</h2>
+            <p style="color:#6b7280;">Masuk ke dashboard administrasi SIMANDAKES</p>
+        </div>
+        
+        <form class="login-form" onsubmit="handleLogin(event)">
+            <div class="form-group">
+                <label>Username</label>
+                <div class="input-group">
+                    <svg class="input-icon" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                    <input type="text" class="input input-with-icon" id="loginUsername" placeholder="Masukkan username" required>
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label>Password</label>
+                <div class="input-group">
+                    <svg class="input-icon" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                    <input type="password" class="input input-with-icon" id="loginPassword" placeholder="Masukkan password" required>
+                </div>
+            </div>
+            
+            <div id="loginError" class="alert alert-danger hidden"></div>
+            
+            <button type="submit" class="btn btn-danger w-full" id="loginBtn">
+                <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                Masuk ke Dashboard
+            </button>
+        </form>
+        
+        <div style="text-align:center;margin-top:24px;">
+            <button class="btn btn-secondary" onclick="showLanding()">
+                <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+                Kembali ke Beranda
+            </button>
+        </div>
+    </div>
+</div>
+
+    <!-- ===== PARTIAL: DASHBOARD (file: partials/dashboard.html) ===== -->
+<!-- ==================== DASHBOARD ==================== -->
+<div id="dashboardPage" class="hidden">
+    <div class="dashboard-layout">
+        <!-- Sidebar -->
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <div class="logo-icon">
+                    <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
+                </div>
+                <span class="logo-text">SIMANDAKES</span>
+            </div>
+            
+            <nav class="sidebar-nav">
+                <!-- Bagian 1: Dashboard -->
+                <div class="nav-section">
+                    <div class="nav-section-title">Dashboard</div>
+                    <div class="nav-item active" data-view="inovdash" onclick="navigateTo('inovdash')">
+                        <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M18 20V10M12 20V4M6 20v-6"/></svg>
+                        <span>InovDash</span>
+                    </div>
+                    <div class="nav-item" data-view="named" onclick="navigateTo('named')">
+                        <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="23" y1="11" x2="17" y2="11"/></svg>
+                        <span>Named</span>
+                    </div>
+                    <div class="nav-item" data-view="nakes" onclick="navigateTo('nakes')">
+                        <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                        <span>Nakes</span>
+                    </div>
+                </div>
+                
+                <!-- Bagian 2: Pelayanan -->
+                <div class="nav-section">
+                    <div class="nav-section-title">🏥 Pelayanan Kesehatan</div>
+                    
+                    <!-- Sub-grup: Tenaga Medis Dokter -->
+                    <div class="nav-subgroup-label">
+                        <span>👨‍⚕️ Tenaga Medis</span>
+                    </div>
+                    <div class="nav-item" data-view="cari-dokter" onclick="navigateTo('cari-dokter')">
+                        <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+                        <span>Cari Dokter</span>
+                        <span class="nav-item-badge" style="background:#eef2ff;color:#4f46e5;">Dokter Umum & Spesialis</span>
+                    </div>
+                    <div class="nav-item" data-view="cari-dokter-gigi" onclick="navigateTo('cari-dokter-gigi')">
+                        <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2z"/><path d="M14.5 7.5c-.83 0-1.5.67-1.5 1.5v6c0 .83.67 1.5 1.5 1.5s1.5-.67 1.5-1.5V9c0-.83-.67-1.5-1.5-1.5z"/><path d="M9.5 7.5c-.83 0-1.5.67-1.5 1.5v6c0 .83.67 1.5 1.5 1.5s1.5-.67 1.5-1.5V9c0-.83-.67-1.5-1.5-1.5z"/></svg>
+                        <span>Cari Dokter Gigi</span>
+                        <span class="nav-item-badge" style="background:#cffafe;color:#0891b2;">Spesialis Gigi</span>
+                    </div>
+                    
+                    <!-- Sub-grup: Tenaga Kesehatan Non-Dokter -->
+                    <div class="nav-subgroup-label" style="margin-top:8px;">
+                        <span>👩‍⚕️ Tenaga Kesehatan</span>
+                    </div>
+                    <div class="nav-item" data-view="cari-bidan" onclick="navigateTo('cari-bidan')">
+                        <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2z"/><path d="M12 8v4l3 3"/></svg>
+                        <span>Cari Bidan</span>
+                        <span class="nav-item-badge" style="background:#fce7f3;color:#ec4899;">Kebidanan</span>
+                    </div>
+                    <div class="nav-item" data-view="cari-perawat" onclick="navigateTo('cari-perawat')">
+                        <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                        <span>Cari Perawat</span>
+                        <span class="nav-item-badge" style="background:#f3e8ff;color:#a855f7;">Perawatan</span>
+                    </div>
+                    <div class="nav-item" data-view="cari-apoteker" onclick="navigateTo('cari-apoteker')">
+                        <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/><path d="M12 5 9 2 6 5"/><path d="M12 5l3-3 3 3"/></svg>
+                        <span>Cari Apoteker</span>
+                        <span class="nav-item-badge" style="background:#fef9c3;color:#ca8a04;">Farmasi</span>
+                    </div>
+                    
+                    <!-- Sub-grup: Semua Data -->
+                    <div class="nav-subgroup-label" style="margin-top:8px;">
+                        <span>📋 Lengkap</span>
+                    </div>
+                    <div class="nav-item nav-item-highlight" data-view="cari-praktik" onclick="navigateTo('cari-praktik')">
+                        <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"/></svg>
+                        <span>Semua Nakes</span>
+                        <span class="nav-item-badge" style="background:#d1fae5;color:#059669;">Seluruh Data</span>
+                    </div>
+                </div>
+                
+                <!-- Bagian 3: Panel Admin -->
+                <div class="nav-section">
+                    <div class="nav-section-title">Panel Admin</div>
+                    <div class="nav-item" data-view="admin-dashboard" onclick="navigateTo('admin-dashboard')" id="adminNavBtn">
+                        <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                        <span id="adminNavText">Login Admin</span>
+                    </div>
+                    <div class="nav-item hidden" id="logoutNavBtn" onclick="handleLogout()">
+                        <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+                        <span>Keluar</span>
+                    </div>
+                </div>
+            </nav>
+            
+            <div class="sidebar-toggle" onclick="toggleSidebar()">
+                <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg>
+            </div>
+            
+            <div class="sidebar-user hidden" id="sidebarUser">
+                <div class="user-info">
+                    <div class="avatar avatar-sm" id="userAvatar">SA</div>
+                    <div>
+                        <p style="font-weight:600;font-size:14px;" id="userNameDisplay">Super Admin</p>
+                        <span class="badge badge-danger" id="userRoleBadge">superadmin</span>
+                    </div>
+                </div>
+            </div>
+        </aside>
+        
+        <!-- Main Content -->
+        <main class="main-content">
+            <header class="top-header">
+                <div class="page-title">
+                    <h2 id="pageTitle">InovDash</h2>
+                    <p id="pageSubtitle">Dashboard Analitik Real-time</p>
+                </div>
+                <div class="header-actions">
+                    <button class="btn btn-secondary btn-sm" id="loginHeaderBtn" onclick="showLogin()">
+                        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                        Login Admin
+                    </button>
+                    <button class="btn btn-secondary btn-sm hidden" id="logoutHeaderBtn" onclick="handleLogout()">
+                        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+                        Keluar
+                    </button>
+                    <button class="btn btn-secondary btn-icon" onclick="showLanding()" title="Beranda">
+                        <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+                    </button>
+                </div>
+            </header>
+            
+            <div class="page-content" id="pageContent">
+                <!-- Dynamic content loaded here -->
+            </div>
+        </main>
+    </div>
+</div>
+
+    <!-- Toast Container (untuk notifikasi) -->
+    <div id="toastContainer"></div>
+
+    <!-- ===== JS MODULAR ===== -->
+    <!--
+      Urutan load PENTING:
+        1. config.js          - konfigurasi aplikasi (URL backend, dll)
+        2. api.js             - layer komunikasi ke backend (Nhost GraphQL / Google Sheets fallback)
+        3. state.js           - global state & local storage helpers
+        4. storage.js         - persistence ke localStorage
+        5. export.js          - export CSV
+        6. navigation.js      - routing antar halaman
+        7-10. render-*.js     - render view (inovash, named, nakes, pelayanan)
+        11. maps.js           - Google Maps / OSM
+        12. auth.js           - login/logout admin
+        13. admin.js          - dashboard admin (CRUD)
+        14. app.js            - inisialisasi & event listeners utama (DI LOAD TERAKHIR)
+
+      Semua script di-load dengan `defer` agar dieksekusi
+      setelah DOM selesai diparse, dengan urutan sesuai deklarasi.
+    -->
+    <script src="js/config.js" defer></script>
+    <script src="js/nhost-client.js" defer></script>
+    <script src="js/api.js" defer></script>
+    <script src="js/api-sheet.js" defer></script>
+    <script src="js/navigation.js" defer></script>
+    <script src="js/ui.js" defer></script>
+    <script src="js/render-inovash.js" defer></script>
+    <script src="js/render-named.js" defer></script>
+    <script src="js/render-nakes.js" defer></script>
+    <script src="js/render-pelayanan.js" defer></script>
+    <script src="js/maps.js" defer></script>
+    <script src="js/auth.js" defer></script>
+    <script src="js/admin.js" defer></script>
+    <script src="js/storage.js" defer></script>
+    <script src="js/session.js" defer></script>
+    <script src="js/app.js" defer></script>
+</body>
+</html>

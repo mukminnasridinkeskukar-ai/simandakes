@@ -1,0 +1,36 @@
+# Nhost configuration untuk SIMANDAKES
+# File ini dibaca oleh `nhost dev` dan `nhost deploy`.
+
+project:
+  name: simandakes
+  region: ap-southeast-1
+
+version: latest
+
+database:
+  postgres_version: '15'
+  pooling_mode: transaction
+
+auth:
+  enabled: true
+  methods:
+    email_password:
+      enabled: true
+      require_verification: false  # set true untuk produksi
+    magic_link:
+      enabled: false
+    anonymous:
+      enabled: false
+
+graphql:
+  enabled: true
+  admin_secret_env: NHOST_ADMIN_SECRET
+
+functions:
+  - name: login
+    path: ./functions/login.js
+  - name: sync-google-sheets
+    path: ./functions/sync-google-sheets.js
+
+storage:
+  enabled: true
