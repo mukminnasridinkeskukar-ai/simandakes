@@ -13,9 +13,8 @@
 │  │  Postgres 15 (managed)                        │  │
 │  │  ├── public.users              (akun login)   │  │
 │  │  ├── public.data_nakes          (data nakes)  │  │
-│  │  ├── public.institusi_named     (inovasi dash)│  │
-│  │  ├── public.institusi_nakes     (agregat)     │  │
-│  │  └── public.inovash_links       (12 link)     │  │
+│  │  ├── public.institusi_named     (menu Named)  │  │
+│  │  └── public.institusi_nakes     (agregat)     │  │
 │  └────────────────────────────────────────────────┘  │
 │  ┌────────────────────────────────────────────────┐  │
 │  │  Hasura GraphQL Engine (auto-generated API)    │  │
@@ -103,7 +102,15 @@ hasura metadata apply --metadata-file backend/metadata/tables_metadata.json
 | `data_nakes`        | select (aktif only) | full CRUD            | full CRUD + delete    |
 | `institusi_named`   | select               | full CRUD            | full CRUD + delete    |
 | `institusi_nakes`   | select               | full CRUD            | full CRUD + delete    |
-| `inovash_links`     | select (active only) | select only         | full CRUD             |
+
+### Custom Functions (Hasura permissions)
+
+| Function | anonymous | operator | admin |
+|----------|-----------|----------|-------|
+| `search_nakes(pattern)` | ✅ | ✅ | ✅ |
+| `get_nakes_by_jenis(jenis)` | ✅ | ✅ | ✅ |
+| `get_dashboard_stats()` | ✅ | ✅ | ✅ |
+| `v_institusi_summary` (view) | ✅ | ✅ | ✅ |
 
 ### Langkah 4: Deploy Serverless Functions
 
@@ -261,7 +268,7 @@ Response:
 | id         | UUID (PK)    | Auto-generated                      |
 | legacy_id  | TEXT UNIQUE  | ID legacy                           |
 | institusi | TEXT         | Nama institusi                      |
-| tipe       | TEXT         | `RS`/`Puskesmas`/`Klinik`/`Apotek`/`Lainnya` |
+| tipe       | institusi_tipe | `RS`/`Puskesmas`/`Klinik`/`Apotek`/`Lainnya` |
 | perawat    | INTEGER      | Jumlah perawat                      |
 | bidan      | INTEGER      | Jumlah bidan                        |
 | apoteker   | INTEGER      | Jumlah apoteker                     |
@@ -271,21 +278,65 @@ Response:
 | created_at | TIMESTAMPTZ  | Auto                               |
 | deleted_at | TIMESTAMPTZ  | Soft-delete marker                  |
 
-### Tabel `inovash_links`
+### Custom Functions
 
-| Kolom        | Type         | Keterangan                          |
-|-------------|--------------|-------------------------------------|
-| id          | UUID (PK)    | Auto-generated                      |
-| slug        | TEXT UNIQUE  | URL slug (mis. `simrs`)             |
-| title       | TEXT         | Display title                       |
-| url         | TEXT         | URL eksternal                       |
-| category    | TEXT         | `umum`/`pelayanan`/`admin`/`laporan` |
-| emoji       | TEXT         | Emoji icon                          |
-| color       | TEXT         | Hex color                           |
-| is_active   | BOOLEAN      | Tampilkan/sembunyikan               |
-| sort_order  | INTEGER      | Urutan tampil                       |
-| created_at  | TIMESTAMPTZ  | Auto                               |
-| updated_at  | TIMESTAMPTZ  | Auto (trigger)                      |
+#### `search_nakes(pattern TEXT, limit_count INTEGER DEFAULT 20)`
+
+Pencarian fuzzy nama nakes (pakai `pg_trgm`).
+
+| Kolom       | Type         | Keterangan                          |
+|------------|--------------|-------------------------------------|
+| id         | UUID         | ID nakes                            |
+| legacy_id  | TEXT         | ID legacy                           |
+| nama       | TEXT         | Nama nakes                          |
+| jenis      | nakes_jenis  | Jenis nakes                         |
+| spesialisasi | TEXT       | Spesialisasi                        |
+| ...        | ...          | (kolom lengkap data_nakes)         |
+| similarity | REAL         | Skor kemiripan (0-1)               |
+
+#### `get_nakes_by_jenis(jenis_filter nakes_jenis, limit_count INTEGER DEFAULT 100)`
+
+Filter nakes berdasarkan jenis. Dipakai untuk menu Pelayanan:
+- `'Dokter'` → Cari Dokter
+- `'Dokter Gigi'` → Cari Dokter Gigi
+- `'Bidan'` → Cari Bidan
+- `'Perawat'` → Cari Perawat
+- `'Apoteker'` → Cari Apoteker
+
+#### `get_dashboard_stats()`
+
+Mengembalikan ringkasan statistik untuk dashboard:
+
+| Kolom | Type | Keterangan |
+|-------|------|------------|
+| total_nakes | INTEGER | Total semua nakes |
+| total_dokter | INTEGER | Total dokter |
+| total_dokter_gigi | INTEGER | Total dokter gigi |
+| total_bidan | INTEGER | Total bidan |
+| total_perawat | INTEGER | Total perawat |
+| total_apoteker | INTEGER | Total apoteker |
+| total_lainnya | INTEGER | Total tenaga kesehatan lainnya |
+| total_aktif | INTEGER | Total nakes dengan status aktif |
+| total_nonaktif | INTEGER | Total nakes dengan status nonaktif |
+| total_institusi | INTEGER | Total institusi di tabel institusi_named |
+
+#### `v_institusi_summary` (View)
+
+Gabungan data dari `institusi_named` + `institusi_nakes`.
+
+| Kolom | Type | Keterangan |
+|-------|------|------------|
+| nama_institusi | TEXT | Nama institusi (gabungan) |
+| tipe | institusi_tipe | Tipe institusi |
+| dokter | INTEGER | Jumlah dokter |
+| dokter_gigi | INTEGER | Jumlah dokter gigi |
+| perawat | INTEGER | Jumlah perawat |
+| bidan | INTEGER | Jumlah bidan |
+| apoteker | INTEGER | Jumlah apoteker |
+| lainnya | INTEGER | Jumlah tenaga kesehatan lainnya |
+| total_nakes | INTEGER | Total nakes (dokter + dg + perawat + bidan + apoteker + lainnya) |
+| persentase | TEXT | Persentase dari total |
+| last_updated | TIMESTAMPTZ | Timestamp update terakhir |
 
 ## Sample GraphQL Queries
 

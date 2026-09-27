@@ -1,6 +1,15 @@
 {
-  "_comment": "SIMANDAKES - Hasura Metadata (Permissions & Relationships)",
+  "_comment": "SIMANDAKES - Hasura Metadata (Permissions & Relationships) v2.1 - sesuai sidebar",
   "_note": "File ini adalah template. Nhost akan auto-generate metadata sebenarnya saat kamu apply migration. Edit di Nhost Console untuk production.",
+  "_tables": [
+    "users (login admin)",
+    "data_nakes (menu Nakes Directory + semua menu Pelayanan)",
+    "institusi_named (menu Named)",
+    "institusi_nakes (admin dashboard - agregat nakes per institusi)"
+  ],
+  "_removed_tables": [
+    "inovash_links (menu InovDash sudah dihapus dari sidebar)"
+  ],
   "version": 3,
   "sources": [
     {
@@ -24,17 +33,7 @@
               "role": "operator",
               "permission": {
                 "columns": ["id", "username", "nama_lengkap", "role", "email", "status", "last_login_at", "created_at"],
-                "filter": { "status": { "_neq": "deleted" } }
-              }
-            }
-          ],
-          "update_permissions": [
-            {
-              "role": "admin",
-              "permission": {
-                "columns": ["username", "nama_lengkap", "role", "email", "status"],
-                "filter": {},
-                "set": { "updated_at": "now()" }
+                "filter": { "status": { "_neq": "suspended" } }
               }
             }
           ],
@@ -45,6 +44,16 @@
                 "columns": ["username", "password_hash", "nama_lengkap", "role", "email", "status"],
                 "check": {},
                 "set": { "created_at": "now()" }
+              }
+            }
+          ],
+          "update_permissions": [
+            {
+              "role": "admin",
+              "permission": {
+                "columns": ["username", "nama_lengkap", "role", "email", "status"],
+                "filter": {},
+                "set": { "updated_at": "now()" }
               }
             }
           ],
@@ -60,22 +69,32 @@
             "schema": "public",
             "name": "data_nakes"
           },
+          "_comment": "Dipakai untuk menu Nakes Directory + Cari Dokter/Bidan/Perawat/Apoteker/Praktik",
           "select_permissions": [
             {
               "role": "anonymous",
               "_comment": "Publik bisa lihat data nakes aktif (untuk pencarian)",
               "permission": {
-                "columns": ["id", "nama", "jenis", "spesialisasi", "str", "sip", "alamat_praktik", "jadwal_praktik", "no_telepon", "email", "status", "foto_url", "alamat_google_maps"],
-                "filter": { "status": { "_eq": "aktif" }, "deleted_at": { "_is_null": true } }
+                "columns": ["id", "legacy_id", "nama", "jenis", "spesialisasi", "str", "sip", "alamat_praktik", "jadwal_praktik", "no_telepon", "email", "status", "foto_url", "alamat_google_maps"],
+                "filter": {
+                  "status": { "_eq": "aktif" },
+                  "deleted_at": { "_is_null": true }
+                }
               }
             },
             {
               "role": "operator",
-              "permission": { "columns": "*", "filter": { "deleted_at": { "_is_null": true } } }
+              "permission": {
+                "columns": "*",
+                "filter": { "deleted_at": { "_is_null": true } }
+              }
             },
             {
               "role": "admin",
-              "permission": { "columns": "*", "filter": {} }
+              "permission": {
+                "columns": "*",
+                "filter": {}
+              }
             }
           ],
           "insert_permissions": [
@@ -107,7 +126,11 @@
             },
             {
               "role": "admin",
-              "permission": { "columns": "*", "filter": {}, "set": { "updated_at": "now()" } }
+              "permission": {
+                "columns": "*",
+                "filter": {},
+                "set": { "updated_at": "now()" }
+              }
             }
           ],
           "delete_permissions": [
@@ -122,10 +145,14 @@
             "schema": "public",
             "name": "institusi_named"
           },
+          "_comment": "Dipakai untuk menu Dashboard > Named",
           "select_permissions": [
             {
               "role": "anonymous",
-              "permission": { "columns": ["id", "nama", "tipe", "dokter", "dokter_gigi", "total", "persentase", "updated_at"], "filter": { "deleted_at": { "_is_null": true } } }
+              "permission": {
+                "columns": ["id", "nama", "tipe", "dokter", "dokter_gigi", "total", "persentase", "updated_at"],
+                "filter": { "deleted_at": { "_is_null": true } }
+              }
             },
             {
               "role": "operator",
@@ -137,15 +164,42 @@
             }
           ],
           "insert_permissions": [
-            { "role": "operator", "permission": { "columns": ["legacy_id", "nama", "tipe", "dokter", "dokter_gigi", "total", "persentase"], "check": {}, "set": { "created_at": "now()" } } },
-            { "role": "admin", "permission": { "columns": "*", "check": {}, "set": { "created_at": "now()" } } }
+            {
+              "role": "operator",
+              "permission": {
+                "columns": ["legacy_id", "nama", "tipe", "dokter", "dokter_gigi", "total", "persentase"],
+                "check": {},
+                "set": { "created_at": "now()" }
+              }
+            },
+            {
+              "role": "admin",
+              "permission": {
+                "columns": "*",
+                "check": {},
+                "set": { "created_at": "now()" }
+              }
+            }
           ],
           "update_permissions": [
-            { "role": "operator", "permission": { "columns": ["nama", "tipe", "dokter", "dokter_gigi", "total", "persentase"], "filter": {}, "set": { "updated_at": "now()" } } },
-            { "role": "admin", "permission": { "columns": "*", "filter": {}, "set": { "updated_at": "now()" } } }
+            {
+              "role": "operator",
+              "permission": {
+                "columns": ["nama", "tipe", "dokter", "dokter_gigi", "total", "persentase"],
+                "filter": {},
+                "set": { "updated_at": "now()" }
+              }
+            },
+            {
+              "role": "admin",
+              "permission": { "columns": "*", "filter": {}, "set": { "updated_at": "now()" } }
+            }
           ],
           "delete_permissions": [
-            { "role": "admin", "permission": { "filter": {} } }
+            {
+              "role": "admin",
+              "permission": { "filter": {} }
+            }
           ]
         },
         {
@@ -153,42 +207,102 @@
             "schema": "public",
             "name": "institusi_nakes"
           },
+          "_comment": "Dipakai untuk admin dashboard - agregat nakes per institusi",
           "select_permissions": [
-            { "role": "anonymous", "permission": { "columns": ["id", "institusi", "tipe", "perawat", "bidan", "apoteker", "lainnya", "total", "updated_at"], "filter": { "deleted_at": { "_is_null": true } } } },
-            { "role": "operator", "permission": { "columns": "*", "filter": {} } },
-            { "role": "admin", "permission": { "columns": "*", "filter": {} } }
+            {
+              "role": "anonymous",
+              "permission": {
+                "columns": ["id", "institusi", "tipe", "perawat", "bidan", "apoteker", "lainnya", "total", "updated_at"],
+                "filter": { "deleted_at": { "_is_null": true } }
+              }
+            },
+            {
+              "role": "operator",
+              "permission": { "columns": "*", "filter": {} }
+            },
+            {
+              "role": "admin",
+              "permission": { "columns": "*", "filter": {} }
+            }
           ],
           "insert_permissions": [
-            { "role": "operator", "permission": { "columns": ["legacy_id", "institusi", "tipe", "perawat", "bidan", "apoteker", "lainnya", "total"], "check": {}, "set": { "created_at": "now()" } } },
-            { "role": "admin", "permission": { "columns": "*", "check": {}, "set": { "created_at": "now()" } } }
+            {
+              "role": "operator",
+              "permission": {
+                "columns": ["legacy_id", "institusi", "tipe", "perawat", "bidan", "apoteker", "lainnya", "total"],
+                "check": {},
+                "set": { "created_at": "now()" }
+              }
+            },
+            {
+              "role": "admin",
+              "permission": { "columns": "*", "check": {}, "set": { "created_at": "now()" } }
+            }
           ],
           "update_permissions": [
-            { "role": "operator", "permission": { "columns": ["institusi", "tipe", "perawat", "bidan", "apoteker", "lainnya", "total"], "filter": {}, "set": { "updated_at": "now()" } } },
-            { "role": "admin", "permission": { "columns": "*", "filter": {}, "set": { "updated_at": "now()" } } }
+            {
+              "role": "operator",
+              "permission": {
+                "columns": ["institusi", "tipe", "perawat", "bidan", "apoteker", "lainnya", "total"],
+                "filter": {},
+                "set": { "updated_at": "now()" }
+              }
+            },
+            {
+              "role": "admin",
+              "permission": { "columns": "*", "filter": {}, "set": { "updated_at": "now()" } }
+            }
           ],
           "delete_permissions": [
-            { "role": "admin", "permission": { "filter": {} } }
+            {
+              "role": "admin",
+              "permission": { "filter": {} }
+            }
           ]
         },
         {
           "table": {
             "schema": "public",
-            "name": "inovash_links"
+            "name": "v_institusi_summary"
           },
+          "_comment": "View ringkasan institusi (gabungan institusi_named + institusi_nakes)",
           "select_permissions": [
-            { "role": "anonymous", "permission": { "columns": ["id", "slug", "title", "url", "category", "emoji", "color", "sort_order"], "filter": { "is_active": { "_eq": true } } } },
-            { "role": "operator", "permission": { "columns": "*", "filter": {} } },
-            { "role": "admin", "permission": { "columns": "*", "filter": {} } }
-          ],
-          "insert_permissions": [
-            { "role": "admin", "permission": { "columns": "*", "check": {}, "set": { "created_at": "now()" } } }
-          ],
-          "update_permissions": [
-            { "role": "admin", "permission": { "columns": "*", "filter": {}, "set": { "updated_at": "now()" } } }
-          ],
-          "delete_permissions": [
-            { "role": "admin", "permission": { "filter": {} } }
+            {
+              "role": "anonymous",
+              "permission": { "columns": "*", "filter": {} }
+            },
+            {
+              "role": "operator",
+              "permission": { "columns": "*", "filter": {} }
+            },
+            {
+              "role": "admin",
+              "permission": { "columns": "*", "filter": {} }
+            }
           ]
+        }
+      ],
+      "functions": [
+        {
+          "function": {
+            "schema": "public",
+            "name": "search_nakes"
+          },
+          "_comment": "Fuzzy search nama nakes untuk menu Nakes Directory"
+        },
+        {
+          "function": {
+            "schema": "public",
+            "name": "get_nakes_by_jenis"
+          },
+          "_comment": "Filter nakes by jenis untuk menu Cari Dokter/Bidan/Perawat/Apoteker"
+        },
+        {
+          "function": {
+            "schema": "public",
+            "name": "get_dashboard_stats"
+          },
+          "_comment": "Statistik untuk dashboard utama"
         }
       ]
     }
