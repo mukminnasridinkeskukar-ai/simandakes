@@ -326,7 +326,7 @@ const ICON_SVGS = {
 // ==================== STATE MANAGEMENT ====================
 let state = {
     currentView: 'landing',
-    dashboardView: 'inovdash',
+    dashboardView: 'nakes',
     isLoggedIn: false,
     userRole: null,
     userName: '',

@@ -3,10 +3,16 @@
 // Toast, stats, render dispatcher
 // =============================================================
 
-// ==================== GOOGLE SHEETS INTEGRATION ====================
-async function syncWithGoogleSheet() {
-    // Use new comprehensive sync (CSV + Apps Script fallback)
-    await syncAllData();
+// ==================== SYNC STATUS UI (no-op, no button) ====================
+/**
+ * UpdateSyncUI — sebelumnya mengubah tombol "Sync Data".
+ * Tombol sync sudah dihapus; data otomatis di-fetch dari Nhost saat init.
+ * Fungsi ini dipertahankan sebagai no-op supaya kode lain yang memanggil
+ * tetap berjalan tanpa error.
+ */
+function updateSyncUI() {
+    // No-op. Data selalu fresh dari Nhost.
+    return;
 }
 
 // ==================== TOAST NOTIFICATION ====================

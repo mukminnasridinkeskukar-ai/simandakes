@@ -14,6 +14,7 @@ Repo ini berisi **versi modular** dari SIMANDAKES yang aslinya adalah satu file 
 - 🚀 **Performant** — browser bisa cache file individual
 - 👥 **Collaborative** — multiple developer bisa kerja paralel tanpa conflict
 - 🔄 **Backend-agnostic** — tinggal toggle `BACKEND_MODE` untuk ganti antara Google Sheets (legacy) dan Nhost (production)
+- ⚠️ **Catatan perubahan v2.1**: Menu InovDash & tombol Sync Data sudah dihapus. Data otomatis di-fetch dari Nhost saat aplikasi dimuat (tidak ada mock data, tidak ada fallback Google Sheets).
 
 ## Arsitektur
 
@@ -42,7 +43,7 @@ simandakes/                           ← root repo (frontend langsung di sini)
 ├── .gitignore
 ├── .env.example
 │
-├── css/                              ← 12 file CSS modular
+├── css/                              ← 11 file CSS modular
 │   ├── base.css                      ← reset, root variables
 │   ├── utilities.css                 ← helper classes
 │   ├── components.css                 ← buttons, cards, badges, avatars
@@ -50,7 +51,6 @@ simandakes/                           ← root repo (frontend langsung di sini)
 │   ├── tables.css                    ← table styling
 │   ├── landing.css                   ← landing page publik
 │   ├── dashboard.css                 ← dashboard layout & sidebar
-│   ├── inovash.css                   ← Inovash platform cards
 │   ├── pelayanan.css                 ← kartu pelayanan
 │   ├── institusi.css                 ← grid institusi
 │   ├── modals.css                    ← lightbox & popup
@@ -59,8 +59,8 @@ simandakes/                           ← root repo (frontend langsung di sini)
 ├── js/                               ← 16 modul JavaScript
 │   ├── config.js                     ← konfigurasi (URL backend, mode)
 │   ├── nhost-client.js               ← GraphQL client ringan untuk Nhost
-│   ├── api.js                        ← layer API (Nhost / Google Sheets CSV)
-│   ├── api-sheet.js                  ← Google Apps Script API + Nhost adapters
+│   ├── api.js                        ← layer API (Nhost GraphQL only)
+│   ├── api-sheet.js                  ← Nhost GraphQL adapters (sync, CRUD)
 │   ├── navigation.js                 ← routing antar halaman
 │   ├── ui.js                         ← toast, stats, render dispatcher
 │   ├── render-inovash.js             ← render dashboard Inovash
@@ -105,9 +105,9 @@ simandakes/                           ← root repo (frontend langsung di sini)
 1. Unzip file `simandakes.zip`
 2. Buka folder `simandakes/`
 3. **Double-click `index.html`** → akan terbuka di browser default
-4. ✅ Aplikasi langsung jalan (mode default: `csv` — baca dari Google Sheets publik)
+4. ⚠️ **Catatan**: Tanpa backend Nhost, aplikasi akan tampil tapi data tidak akan termuat (tidak ada mock data). Untuk pengalaman penuh, deploy backend dulu (lihat bagian Setup Backend).
 
-Untuk testing dengan fitur lengkap (admin, CRUD), disarankan pakai local HTTP server:
+Untuk testing dengan fitur lengkap, jalankan local HTTP server:
 
 ```bash
 cd simandakes
@@ -215,16 +215,15 @@ Buat hash bcrypt baru di [bcrypt-generator.com](https://bcrypt-generator.com/).
 - 📞 Lihat detail nakes (STR, SIP, alamat, jadwal praktik, telepon, email)
 - 🗺️ Popup Google Maps untuk alamat praktik
 - 📊 Lihat statistik institusi kesehatan
+- 🔄 **Auto-fetch**: data selalu fresh dari Nhost saat halaman dimuat (tidak ada tombol sync, tidak ada mock data)
 
 ### Untuk Admin (login required)
 
-- 📋 Dashboard Inovash (12 link platform SIMRS, SIRS, SIP, dll)
 - 👨‍⚕️ Manajemen data Nakes (CRUD: Create, Read, Update, Delete)
 - 🏥 Manajemen data Named (institusi)
 - 📊 Manajemen institusi Nakes (agregat perawat/bidan/apoteker)
 - 👥 Manajemen user (admin/operator)
 - 📤 Export data ke CSV
-- ⚙️ Edit URL link Inovash
 
 ## License
 

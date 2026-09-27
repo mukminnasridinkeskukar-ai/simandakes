@@ -156,104 +156,36 @@ async function getFromSheet(action) {
 }
 
 /**
- * Sync data Nakes (DataNakes sheet) dari Google Sheets
- * Sheet "DataNakes": ID, Nama, Jenis, Spesialisasi, STR, SIP, Alamat, Jadwal, Telepon, Email, Status, Foto
- * PRIORITY: CSV direct access → fallback ke Apps Script
+ * Sync data Nakes dari Nhost.
+ * Tabel: data_nakes
  */
 async function syncNakesData() {
-    // === NHOST MODE: fetch via GraphQL ===
-    if (CONFIG.BACKEND_MODE === 'nhost' && window.nhostClient) {
-        try {
-            state.syncStatus = 'syncing';
-            updateSyncUI();
-            const data = await nhostClient.query(NHOST_QUERIES.getAllNakes);
-            state.cachedNakesData = (data.data_nakes || []).map(nakesFromNhost);
-            state.sheetConnected = true;
-            state.lastSyncTime = new Date();
-            console.log(`✅ Sync DataNakes via Nhost: ${state.cachedNakesData.length} Nakes`);
-            showNotification(`Berhasil sync ${state.cachedNakesData.length} data Nakes dari Nhost`, 'success');
-            state.syncStatus = 'idle';
-            updateSyncUI();
-            updateHeroStats();
-            return;
-        } catch (error) {
-            console.error('Nhost sync Nakes error:', error);
-            showNotification('Gagal sync dari Nhost, fallback ke Google Sheets: ' + error.message, 'warning');
-            // Fallback ke Google Sheets di bawah
-        }
+    // === NHOST ONLY: tidak ada fallback Google Sheets / mock data ===
+    if (!window.nhostClient) {
+        console.error('nhostClient tidak tersedia.');
+        state.sheetConnected = false;
+        return false;
     }
 
-    state.syncStatus = 'syncing';
-    updateSyncUI();
-    
     try {
-        // METHOD 1: Try CSV direct access first (no Apps Script needed!)
-        const csvResult = await fetchGoogleSheetsCSV('DataNakes');
-        
-        if (csvResult.success && csvResult.data.length > 0) {
-            state.cachedNakesData = csvResult.data.map(row => ({
-                id: row.id || row[0] || '',
-                nama: row.nama || row[1] || '',
-                jenis: row.jenis || row[2] || '',
-                spesialisasi: row.spesialisasi || row[3] || '',
-                str: row.str || row[4] || '',
-                sip: row.sip || row[5] || '',
-                alamat_praktik: row.alamatpraktik || row.alamat_praktik || row[6] || '',
-                jadwal_praktik: row.jadwalpraktik || row.jadwal_praktik || row[7] || '',
-                no_telepon: row.notelepon || row.no_telepon || row[8] || '',
-                email: row.email || row[9] || '',
-                status: row.status || row[10] || 'aktif',
-                foto: row.foto || row[11] || '',
-                alamat_google_maps: row.alamatgooglemaps || row.alamat_google_maps || row[12] || ''
-            }));
-            
-            state.sheetConnected = true;
-            state.lastSyncTime = new Date();
-            console.log(`✅ Sync DataNakes via CSV: ${state.cachedNakesData.length} Nakes`);
-            showNotification(`Berhasil sync ${state.cachedNakesData.length} data Nakes`, 'success');
-        } else {
-            // METHOD 2: Fallback to Apps Script Web App
-            if (!CONFIG.GOOGLE_APPS_SCRIPT_URL.includes('YOUR_WEB_APP_ID')) {
-                const result = await getFromSheet('getNakes');
-                
-                if (result.success && result.data) {
-                    state.cachedNakesData = result.data.map(row => ({
-                        id: row[0],
-                        nama: row[1],
-                        jenis: row[2],
-                        spesialisasi: row[3],
-                        str: row[4] || '',
-                        sip: row[5] || '',
-                        alamat_praktik: row[6] || '',
-                        jadwal_praktik: row[7] || '',
-                        no_telepon: row[8] || '',
-                        email: row[9] || '',
-                        status: row[10] || 'aktif',
-                        foto: row[11] || '',
-                        alamat_google_maps: row[12] || ''
-                    }));
-                    
-                    state.sheetConnected = true;
-                    state.lastSyncTime = new Date();
-                    showNotification(`Berhasil sync ${state.cachedNakesData.length} data Nakes`, 'success');
-                } else {
-                    console.warn('⚠️ No DataNakes source available');
-                    state.sheetConnected = false;
-                }
-            } else {
-                console.warn('⚠️ No DataNakes source available - Apps Script URL not configured');
-                state.sheetConnected = false;
-            }
-        }
+        state.syncStatus = 'syncing';
+        updateSyncUI();
+        const data = await nhostClient.query(NHOST_QUERIES.getAllNakes);
+        state.cachedNakesData = (data.data_nakes || []).map(nakesFromNhost);
+        state.sheetConnected = true;
+        state.lastSyncTime = new Date();
+        console.log(`✅ Sync DataNakes via Nhost: ${state.cachedNakesData.length} Nakes`);
+        state.syncStatus = 'idle';
+        updateSyncUI();
+        updateHeroStats();
+        return true;
     } catch (error) {
-        console.error('Sync Nakes error:', error);
+        console.error('Nhost sync Nakes error:', error);
         state.sheetConnected = false;
-        showNotification('Gagal sync data Nakes: ' + error.message, 'warning');
+        state.syncStatus = 'idle';
+        updateSyncUI();
+        return false;
     }
-    
-    state.syncStatus = 'idle';
-    updateSyncUI();
-    updateHeroStats();
 }
 
 /**
@@ -341,152 +273,50 @@ function authenticateUser(username, password) {
 }
 
 /**
- * Sync data Named (Dokter & Dokter Gigi per Institusi) dari Google Sheets
- * Sheet "Named": ID, Institusi, Tipe, Dokter, Dokter Gigi, Total, Persentase
- * PRIORITY: CSV direct access → fallback ke Apps Script
+ * Sync data Named dari Nhost.
+ * Tabel: institusi_named
  */
 async function syncNamedData() {
-    // === NHOST MODE ===
-    if (CONFIG.BACKEND_MODE === 'nhost' && window.nhostClient) {
-        try {
-            const data = await nhostClient.query(NHOST_QUERIES.getAllNamed);
-            state.cachedNamedData = (data.institusi_named || []).map(namedFromNhost);
-            console.log(`✅ Sync Named via Nhost: ${state.cachedNamedData.length} institusi`);
-            state.sheetConnected = true;
-            return true;
-        } catch (error) {
-            console.error('Nhost sync Named error:', error);
-            showNotification('Gagal sync Named dari Nhost, fallback ke Google Sheets', 'warning');
-        }
+    // === NHOST ONLY ===
+    if (!window.nhostClient) {
+        console.error('nhostClient tidak tersedia.');
+        state.sheetConnected = false;
+        return false;
     }
 
     try {
-        // METHOD 1: Try CSV direct access first (no Apps Script needed!)
-        const csvResult = await fetchGoogleSheetsCSV('Named');
-        
-        if (csvResult.success && csvResult.data.length > 0) {
-            state.cachedNamedData = csvResult.data.map(row => ({
-                id: row.id || row[0] || '',
-                nama: row.institusi || row.nama || row[1] || '',
-                tipe: row.tipe || row[2] || 'Lainnya',
-                dokter: parseInt(row.dokter || row['doktergigi']?.split?.(',')[0] || row[3]) || 0,
-                dokterGigi: parseInt(row['doktergigi'] || row['doktergigi'] || row[4]) || 0,
-                total: parseInt(row.total || row[5]) || 0,
-                persentase: row.persentase || row[6] || '0',
-                updatedAt: row.updatedat || row.updatedAt || row[7] || ''
-            }));
-            
-            console.log(`✅ Sync Named data via CSV: ${state.cachedNamedData.length} institusi`);
-            state.sheetConnected = true;
-            return true;
-        }
-        
-        // METHOD 2: Fallback to Apps Script Web App
-        if (!CONFIG.GOOGLE_APPS_SCRIPT_URL.includes('YOUR_WEB_APP_ID')) {
-            const result = await getFromSheet('getNamed');
-            
-            if (result.success && result.data) {
-                state.cachedNamedData = result.data.map(row => ({
-                    id: row.id || row[0],
-                    nama: row.nama || row[1] || '',
-                    tipe: row.tipe || row[2] || 'Lainnya',
-                    dokter: parseInt(row.dokter || row[3]) || 0,
-                    dokterGigi: parseInt(row.dokterGigi || row[4]) || 0,
-                    total: parseInt(row.total || row[5]) || 0,
-                    persentase: row.persentase || row[6] || '',
-                    updatedAt: row.updatedAt || row[7] || ''
-                }));
-                
-                console.log(`✅ Sync Named data via Apps Script: ${state.cachedNamedData.length} institusi`);
-                state.sheetConnected = true;
-                return true;
-            }
-        }
-        
-        console.warn('⚠️ No data source available for Named');
-        state.sheetConnected = false;
-        return false;
-        
+        const data = await nhostClient.query(NHOST_QUERIES.getAllNamed);
+        state.cachedNamedData = (data.institusi_named || []).map(namedFromNhost);
+        console.log(`✅ Sync Named via Nhost: ${state.cachedNamedData.length} institusi`);
+        state.sheetConnected = true;
+        return true;
     } catch (error) {
-        console.error('Named sync error:', error);
-        showNotification('Gagal sync data Named: ' + error.message, 'warning');
+        console.error('Nhost sync Named error:', error);
         state.sheetConnected = false;
         return false;
     }
 }
 
 /**
- * Sync data Nakes Institusi (Perawat, Bidan, Apoteker per Institusi) dari Google Sheets
- * Sheet "Nakes": ID, Institusi, Tipe, Perawat, Bidan, Apoteker, Lainnya, Total, UpdatedAt
- * PRIORITY: CSV direct access → fallback ke Apps Script
+ * Sync data Institusi Nakes dari Nhost.
+ * Tabel: institusi_nakes (agregat perawat/bidan/apoteker/lainnya per institusi)
  */
 async function syncInstitusiNakesData() {
-    // === NHOST MODE ===
-    if (CONFIG.BACKEND_MODE === 'nhost' && window.nhostClient) {
-        try {
-            const data = await nhostClient.query(NHOST_QUERIES.getAllInstitusiNakes);
-            state.cachedInstitusiNakesData = (data.institusi_nakes || []).map(institusiNakesFromNhost);
-            console.log(`✅ Sync InstitusiNakes via Nhost: ${state.cachedInstitusiNakesData.length} institusi`);
-            state.sheetConnected = true;
-            return true;
-        } catch (error) {
-            console.error('Nhost sync InstitusiNakes error:', error);
-            showNotification('Gagal sync InstitusiNakes dari Nhost, fallback ke Google Sheets', 'warning');
-        }
+    // === NHOST ONLY ===
+    if (!window.nhostClient) {
+        console.error('nhostClient tidak tersedia.');
+        state.sheetConnected = false;
+        return false;
     }
 
     try {
-        // METHOD 1: Try CSV direct access first (no Apps Script needed!)
-        const csvResult = await fetchGoogleSheetsCSV('Nakes');
-        
-        if (csvResult.success && csvResult.data.length > 0) {
-            state.cachedInstitusiNakesData = csvResult.data.map(row => ({
-                id: row.id || row[0] || '',
-                nama: row.institusi || row.nama || row[1] || '',
-                tipe: row.tipe || row[2] || 'Lainnya',
-                perawat: parseInt(row.perawat || row[3]) || 0,
-                bidan: parseInt(row.bidan || row[4]) || 0,
-                apoteker: parseInt(row.apoteker || row[5]) || 0,
-                lainnya: parseInt(row.lainnya || row[6]) || 0,
-                total: parseInt(row.total || row[7]) || 0,
-                updatedAt: row.updatedat || row.updatedAt || row[8] || ''
-            }));
-            
-            console.log(`✅ Sync Nakes Institusi via CSV: ${state.cachedInstitusiNakesData.length} institusi`);
-            state.sheetConnected = true;
-            return true;
-        }
-        
-        // METHOD 2: Fallback to Apps Script Web App
-        if (!CONFIG.GOOGLE_APPS_SCRIPT_URL.includes('YOUR_WEB_APP_ID')) {
-            const result = await getFromSheet('getInstitusiNakes');
-            
-            if (result.success && result.data) {
-                state.cachedInstitusiNakesData = result.data.map(row => ({
-                    id: row.id || row[0],
-                    nama: row.nama || row[1] || '',
-                    tipe: row.tipe || row[2] || 'Lainnya',
-                    perawat: parseInt(row.perawat || row[3]) || 0,
-                    bidan: parseInt(row.bidan || row[4]) || 0,
-                    apoteker: parseInt(row.apoteker || row[5]) || 0,
-                    lainnya: parseInt(row.lainnya || row[6]) || 0,
-                    total: parseInt(row.total || row[7]) || 0,
-                    updatedAt: row.updatedAt || row[8] || ''
-                }));
-                
-                console.log(`✅ Sync Nakes Institusi via Apps Script: ${state.cachedInstitusiNakesData.length} institusi`);
-                state.sheetConnected = true;
-                return true;
-            }
-        }
-        
-        console.warn('⚠️ No data source available for Nakes Institusi');
-        state.sheetConnected = false;
-        return false;
-        
+        const data = await nhostClient.query(NHOST_QUERIES.getAllInstitusiNakes);
+        state.cachedInstitusiNakesData = (data.institusi_nakes || []).map(institusiNakesFromNhost);
+        console.log(`✅ Sync InstitusiNakes via Nhost: ${state.cachedInstitusiNakesData.length} institusi`);
+        state.sheetConnected = true;
+        return true;
     } catch (error) {
-        console.error('Nakes Institusi sync error:', error);
-        showNotification('Gagal sync data Nakes: ' + error.message, 'warning');
+        console.error('Nhost sync InstitusiNakes error:', error);
         state.sheetConnected = false;
         return false;
     }
@@ -610,19 +440,6 @@ function showLoading(show) {
     const loader = document.getElementById('globalLoader');
     if (loader) {
         loader.style.display = show ? 'flex' : 'none';
-    }
-}
-
-function updateSyncUI() {
-    const btn = document.querySelector('[onclick="syncWithGoogleSheet()"]');
-    if (btn) {
-        if (state.syncStatus === 'syncing') {
-            btn.disabled = true;
-            btn.innerHTML = '<svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" class="animate-spin"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg> Syncing...';
-        } else {
-            btn.disabled = false;
-            btn.innerHTML = '<svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg> Sync Data';
-        }
     }
 }
 

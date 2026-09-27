@@ -53,7 +53,7 @@ function handleLogout() {
     resetUIForLoggedOutUser();
     
     showToast('Anda telah keluar dari sistem', 'success');
-    navigateTo('inovdash');
+    navigateTo('nakes');
 }
 
 function exportData() {

@@ -1,14 +1,16 @@
 // =============================================================
 // render-inovash.js
-// Render dashboard Inovash + 12 platform cards + data helpers
+// Render dispatcher + data helper functions
+// (Catatan: tampilan InovDash & 12 platform cards sudah dihapus
+//  dari sidebar/menu, tapi fungsi renderInovDash/openPlatform/showComingSoonAlert
+//  tetap dipertahankan untuk backward-compat bila ada kode lama yang memanggil)
 // =============================================================
 
 // ==================== RENDER FUNCTIONS ====================
 function renderCurrentView() {
     const content = document.getElementById('pageContent');
-    
+
     switch(state.dashboardView) {
-        case 'inovdash': content.innerHTML = renderInovDash(); break;
         case 'named': content.innerHTML = renderNamed(); break;
         case 'nakes': content.innerHTML = renderNakes(); break;
         case 'cari-dokter': content.innerHTML = renderPelayananCard('dokter', 'Cari Dokter', 'Temukan dokter sesuai kebutuhan kesehatan Anda', '#4f46e5', '#eef2ff', '👨‍⚕️'); break;
@@ -18,9 +20,9 @@ function renderCurrentView() {
         case 'cari-apoteker': content.innerHTML = renderPelayananCard('apoteker', 'Cari Apoteker', 'Temukan apoteker untuk konsultasi obat dan farmasi', '#ca8a04', '#fef9c3', '💊'); break;
         case 'cari-praktik': content.innerHTML = renderPelayananCard('all', 'Semua Tenaga Kesehatan', 'Jelajahi semua Nakes yang terdaftar di sistem', '#059669', '#d1fae5', '🏥'); break;
         case 'admin-dashboard': content.innerHTML = renderAdminDashboard(); break;
-        default: content.innerHTML = renderInovDash();
+        default: content.innerHTML = renderNakes();
     }
-    
+
     // Initialize card animations after render
     initCardAnimations();
 }
@@ -42,10 +44,6 @@ function renderInovDash() {
             <div style="display:flex;gap:12px;align-items:center;">
                 <span class="badge badge-success">${activeCount} Aktif</span>
                 <span class="badge badge-warning">${comingSoonCount} Segera Hadir</span>
-                <button class="btn btn-primary btn-sm" onclick="syncWithGoogleSheet()" ${state.syncStatus === 'syncing' ? 'disabled' : ''}>
-                    <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" class="${state.syncStatus === 'syncing' ? 'animate-spin' : ''}"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
-                    Sync Data
-                </button>
             </div>
         </div>
 

@@ -40,12 +40,13 @@ function navigateTo(view) {
     
     // Update page title
     const titles = {
-        'inovdash': ['InovDash', 'Dashboard Analitik Real-time'],
         'named': ['Named', 'Manajemen Data Nakes'],
         'nakes': ['Directory Nakes', 'Database Tenaga Kesehatan'],
         'cari-dokter': ['Cari Dokter Praktik', 'Pencarian Dokter Sesuai Kebutuhan'],
+        'cari-dokter-gigi': ['Cari Dokter Gigi', 'Pencarian Dokter Gigi'],
         'cari-bidan': ['Cari Bidan Praktik', 'Pencarian Bidan Terpercaya'],
         'cari-perawat': ['Cari Perawat Praktik', 'Pencarian Perawat Profesional'],
+        'cari-apoteker': ['Cari Apoteker', 'Pencarian Apoteker'],
         'cari-praktik': ['Cari Praktik Nakes', 'Informasi Tempat Praktik'],
         'admin-dashboard': ['Panel Administrasi', 'Kelola Sistem SIMANDAKES']
     };

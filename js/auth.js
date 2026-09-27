@@ -215,10 +215,6 @@ function renderAdminDashboard() {
                 <p style="color:#6b7280;font-size:16px;margin-top:4px;">Kelola data SIMANDAKES • Login sebagai <strong>${state.userName}</strong> (${state.userRole})</p>
             </div>
             <div style="display:flex;gap:12px;">
-                <button onclick="syncAllData()" class="btn btn-secondary btn-sm">
-                    <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
-                    Sync Data
-                </button>
                 <button onclick="exportAllAdminData()" class="btn btn-outline btn-sm">
                     <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
                     Export All

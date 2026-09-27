@@ -337,9 +337,6 @@ function renderPelayananCard(type, title, subtitle, primaryColor, bgColor, emoji
                             class="btn btn-secondary" style="height:46px;border-radius:12px;padding:0 20px;" title="Reset pencarian">
                         🔄 Reset
                     </button>
-                    <button onclick="syncAllData()" class="btn btn-primary" style="height:46px;border-radius:12px;padding:0 20px;" title="Sync data terbaru">
-                        ⬇️ Sync
-                    </button>
                 </div>
             </div>
         </div>
@@ -413,14 +410,11 @@ function renderPelayananCard(type, title, subtitle, primaryColor, bgColor, emoji
                         <h3 style="font-size:20px;font-weight:600;color:#111827;margin-bottom:8px;">Data Tidak Ditemukan</h3>
                         <p style="color:#6b7280;font-size:14px;margin-bottom:20px;line-height:1.6;">
                             Tidak ada data <strong>${type === 'all' ? 'tenaga kesehatan' : type}</strong> yang sesuai.
-                            <br>Pastikan sheet "DataNakes" di Google Sheets sudah berisi data.
+                            <br>Pastikan koneksi ke backend Nhost sudah benar dan tabel <code>data_nakes</code> sudah berisi data.
                         </p>
                         <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap;">
                             <button onclick="state.searchQuery='';renderCurrentView();" class="btn btn-outline">
                                 🔄 Reset Pencarian
-                            </button>
-                            <button onclick="syncAllData();renderCurrentView();" class="btn btn-primary">
-                                ⬇️ Sync Ulang Data
                             </button>
                         </div>
                     </div>
