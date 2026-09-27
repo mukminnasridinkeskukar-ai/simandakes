@@ -7,12 +7,15 @@
 ## Struktur Folder
 
 ```
-frontend/
-├── index.html                 ← entry point
-├── css/                       ← 12 file CSS modular
-├── js/                        ← 15 modul JavaScript
-├── partials/                  ← 3 partial HTML (landing, login, dashboard)
-└── assets/                    ← gambar, favicon, dll (kosong, isi sendiri)
+simandakes/                        ← root repo (frontend di root)
+├── index.html                  ← entry point (langsung diakses)
+├── css/                         ← 12 file CSS modular
+├── js/                          ← 16 modul JavaScript
+├── partials/                   ← 3 partial HTML (sudah di-inline ke index.html)
+├── assets/                      ← gambar, favicon, dll
+├── backend/                     ← kode backend untuk Nhost (lihat backend/README.md)
+├── README.md                    ← overview + quickstart
+└── FRONTEND.md                 ← file ini
 ```
 
 ## Cara Deploy ke GitHub Pages
@@ -25,9 +28,9 @@ frontend/
    git clone https://github.com/USERNAME/simandakes-web.git
    cd simandakes-web
    ```
-3. **Copy semua isi folder `frontend/`** ke root repo:
+3. **Copy SEMUA isi root repo** (`index.html`, `css/`, `js/`, `partials/`, `assets/`) ke root repo GitHub Anda:
    ```bash
-   cp -r /path/ke/simandakes/frontend/* .
+   cp -r /path/ke/simandakes/{index.html,css,js,partials,assets} .
    ```
 4. Commit & push:
    ```bash
@@ -48,7 +51,7 @@ frontend/
 1. Di root repo Anda, buat folder `docs/`:
    ```bash
    mkdir docs
-   cp -r /path/ke/simandakes/frontend/* docs/
+   cp -r /path/ke/simandakes/{index.html,css,js,partials,assets} docs/
    ```
 2. Commit & push
 3. **Settings → Pages** → Source: `main` / `docs`

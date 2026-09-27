@@ -19,79 +19,119 @@ Repo ini berisi **versi modular** dari SIMANDAKES yang aslinya adalah satu file 
 
 ```
 Frontend (GitHub Pages)            Backend (Nhost)
-┌─────────────────────────┐       ┌─────────────────────────────┐
-│  Static HTML/CSS/JS     │       │  Postgres (managed)         │
-│  ───────────────────    │       │  Hasura GraphQL (auto-API)  │
-│  index.html             │       │  Auth (JWT)                 │
-│  ├─ css/  (12 files)    │ ←──→ │  Storage (file uploads)     │
-│  ├─ js/   (15 modules)  │  HTTPS  Functions (serverless JS)  │
-│  ├─ partials/ (3 HTML)  │       │                             │
-│  └─ assets/             │       │  URL: https://xxx.nhost.run │
-│                         │       └─────────────────────────────┘
-│  URL: https://user.github.io/    │
-│       simandakes/                │
-└─────────────────────────┘
+┌───────────────────────────────┐ ┌─────────────────────────────┐
+│  index.html (ROOT, langsung  │ │  Postgres (managed)         │
+│  diakses)                    │ │  Hasura GraphQL (auto-API)  │
+│  ├─ css/  (12 files)         │ │  Auth (JWT)                 │
+│  ├─ js/   (16 modules)       │ ←──→ │  Storage (file uploads)     │
+│  ├─ partials/ (3 HTML)        │ HTTPS  Functions (serverless JS)  │
+│  └─ assets/                  │ │                             │
+│                              │ │  URL: https://xxx.nhost.run │
+│  URL: https://user.github.io/ │ └─────────────────────────────┘
+│       simandakes/            │
+└───────────────────────────────┘
 ```
 
 ## Struktur Folder
 
 ```
-simandakes/
-├── README.md                          ← file ini
-├── frontend/                          ← deploy ke GitHub Pages
-│   ├── README.md                      ← panduan deploy frontend
-│   ├── index.html                     ← entry point (semua CSS/JS di-load di sini)
-│   ├── css/
-│   │   ├── base.css                   ← reset, root variables
-│   │   ├── utilities.css              ← helper classes
-│   │   ├── components.css             ← buttons, cards, badges, avatars
-│   │   ├── forms.css                  ← input, textarea, select
-│   │   ├── tables.css                 ← table styling
-│   │   ├── landing.css               ← landing page publik
-│   │   ├── dashboard.css              ← dashboard layout & sidebar
-│   │   ├── inovash.css                ← Inovash platform cards
-│   │   ├── pelayanan.css              ← kartu pelayanan (cari dokter/bidan/perawat)
-│   │   ├── institusi.css              ← grid institusi
-│   │   ├── modals.css                 ← lightbox & popup
-│   │   └── admin.css                  ← admin panel
-│   ├── js/
-│   │   ├── config.js                  ← konfigurasi (URL backend, mode)
-│   │   ├── nhost-client.js            ← GraphQL client ringan untuk Nhost
-│   │   ├── api.js                     ← layer API (Nhost / Google Sheets)
-│   │   ├── state.js                   ← global state
-│   │   ├── storage.js                 ← localStorage helpers
-│   │   ├── export.js                  ← export CSV
-│   │   ├── navigation.js              ← routing antar halaman
-│   │   ├── render-inovash.js          ← render dashboard Inovash
-│   │   ├── render-named.js            ← render data Named
-│   │   ├── render-nakes.js            ← render data Nakes
-│   │   ├── render-pelayanan.js        ← render kartu pelayanan
-│   │   ├── maps.js                    ← Google Maps / OSM integration
-│   │   ├── auth.js                    ← admin authentication
-│   │   ├── admin.js                   ← dashboard admin (CRUD)
-│   │   └── app.js                     ← inisialisasi & main entry
-│   ├── partials/
-│   │   ├── landing.html               ← partial landing page
-│   │   ├── login.html                 ← partial halaman login
-│   │   └── dashboard.html             ← partial dashboard layout
-│   └── assets/
-│       └── (favicon, gambar, dll)
+simandakes/                           ← root repo (frontend langsung di sini)
+├── index.html                        ← ENTRY POINT — buka file ini di browser
+├── README.md                         ← file ini (overview + quickstart)
+├── FRONTEND.md                       ← panduan deploy frontend ke GitHub Pages
+├── .gitignore
+├── .env.example
 │
-└── backend/                           ← deploy ke Nhost
-    ├── README.md                      ← panduan deploy backend
+├── css/                              ← 12 file CSS modular
+│   ├── base.css                      ← reset, root variables
+│   ├── utilities.css                 ← helper classes
+│   ├── components.css                 ← buttons, cards, badges, avatars
+│   ├── forms.css                     ← input, textarea, select
+│   ├── tables.css                    ← table styling
+│   ├── landing.css                   ← landing page publik
+│   ├── dashboard.css                 ← dashboard layout & sidebar
+│   ├── inovash.css                   ← Inovash platform cards
+│   ├── pelayanan.css                 ← kartu pelayanan
+│   ├── institusi.css                 ← grid institusi
+│   ├── modals.css                    ← lightbox & popup
+│   └── admin.css                     ← admin panel
+│
+├── js/                               ← 16 modul JavaScript
+│   ├── config.js                     ← konfigurasi (URL backend, mode)
+│   ├── nhost-client.js               ← GraphQL client ringan untuk Nhost
+│   ├── api.js                        ← layer API (Nhost / Google Sheets CSV)
+│   ├── api-sheet.js                  ← Google Apps Script API + Nhost adapters
+│   ├── navigation.js                 ← routing antar halaman
+│   ├── ui.js                         ← toast, stats, render dispatcher
+│   ├── render-inovash.js             ← render dashboard Inovash
+│   ├── render-named.js               ← render data Named
+│   ├── render-nakes.js               ← render data Nakes
+│   ├── render-pelayanan.js           ← render kartu pelayanan
+│   ├── maps.js                       ← Google Maps / OSM integration
+│   ├── auth.js                       ← admin authentication
+│   ├── admin.js                      ← dashboard admin (CRUD)
+│   ├── storage.js                    ← localStorage + sync helpers
+│   ├── session.js                    ← session management + logout
+│   └── app.js                        ← inisialisasi & main entry
+│
+├── partials/                         ← referensi HTML (sudah di-inline ke index.html)
+│   ├── landing.html
+│   ├── login.html
+│   └── dashboard.html
+│
+├── assets/
+│   └── favicon.svg
+│
+└── backend/                          ← deploy ke Nhost
+    ├── README.md                     ← panduan deploy backend
+    ├── nhost/
+    │   └── config.yaml                ← konfigurasi project Nhost
     ├── migrations/
     │   ├── 0001_init_schema.sql       ← schema 5 tabel + triggers + seed
     │   └── 0002_trigram_search.sql    ← extension pg_trgm + function fuzzy search
     ├── metadata/
     │   └── tables_metadata.json       ← Hasura permissions (anonymous/operator/admin)
     └── functions/
-        ├── login.js                   ← serverless function: POST /api/login
-        └── sync-google-sheets.js      ← serverless function: migrasi awal dari Google Sheets
+        ├── login.js                   ← serverless function: POST /login
+        └── sync-google-sheets.js      ← serverless function: migrasi dari Google Sheets
 ```
 
-## Quick Start (5 menit)
+> **Kenapa index.html di root?** Supaya bisa **dibuka langsung** dengan double-click, atau di-deploy ke GitHub Pages dengan `Source: main / (root)` tanpa konfigurasi tambahan.
 
-### 1. Deploy Backend ke Nhost
+## Cara Cepat Pakai
+
+### A. Buka Langsung di Komputer
+
+1. Unzip file `simandakes.zip`
+2. Buka folder `simandakes/`
+3. **Double-click `index.html`** → akan terbuka di browser default
+4. ✅ Aplikasi langsung jalan (mode default: `csv` — baca dari Google Sheets publik)
+
+Untuk testing dengan fitur lengkap (admin, CRUD), disarankan pakai local HTTP server:
+
+```bash
+cd simandakes
+python3 -m http.server 8080
+# Buka http://localhost:8080
+```
+
+### B. Deploy ke GitHub Pages
+
+1. Buat repo GitHub baru (misal: `simandakes-web`)
+2. **Copy SEMUA isi root repo ini** (index.html, css/, js/, partials/, assets/, README.md, FRONTEND.md, .gitignore, .env.example, backend/) ke root repo GitHub Anda
+   - Folder `backend/` juga bisa di-push sebagai referensi, tidak akan mengganggu GitHub Pages
+3. Push ke GitHub
+4. Buka **Settings → Pages** → Source: `Deploy from a branch` → Branch: `main` / `(root)`
+5. Tunggu 2-3 menit, lalu akses di:
+   ```
+   https://<username>.github.io/<repo>/
+   ```
+
+> 💡 **Tip**: Kalau mau pakai subfolder `docs/` alih-alih root, pindahkan `index.html`, `css/`, `js/`, `partials/`, `assets/` ke folder `docs/`, lalu set GitHub Pages → Source: `main` / `docs`.
+
+Lihat panduan detail di [`FRONTEND.md`](./FRONTEND.md).
+
+## Setup Backend (Nhost)
 
 Lihat panduan lengkap di [`backend/README.md`](./backend/README.md). Ringkasan:
 
@@ -103,9 +143,9 @@ Lihat panduan lengkap di [`backend/README.md`](./backend/README.md). Ringkasan:
 6. Copy folder `backend/functions/` ke **Nhost Console → Functions**
 7. Buat user admin di Nhost Console > SQL: jalankan seed dari `0001_init_schema.sql`
 
-### 2. Konfigurasi Frontend
+## Konfigurasi Frontend
 
-Edit `frontend/js/config.js`:
+Edit `js/config.js`:
 
 ```javascript
 const NHOST_CONFIG = {
@@ -124,19 +164,9 @@ localStorage.setItem('simandakes_nhost_url', 'https://project-anda.nhost.run');
 location.reload();
 ```
 
-### 3. Deploy Frontend ke GitHub Pages
-
-Lihat panduan lengkap di [`frontend/README.md`](./frontend/README.md). Ringkasan:
-
-1. Buat repo GitHub baru (misal: `simandakes-web`)
-2. Copy isi folder `frontend/` ke root repo (atau ke folder `docs/`)
-3. Push ke GitHub
-4. Buka **Settings → Pages** → Source: `main` / `docs` (atau root)
-5. Akses di `https://<username>.github.io/<repo>/`
-
 ## Migrasi Data dari Google Sheets
 
-Jika Anda sudah punya data di Google Sheets (lihat `SPREADSHEET_ID` lama di `config.js`):
+Jika Anda sudah punya data di Google Sheets (lihat `SPREADSHEET_ID` lama di `js/config.js`):
 
 1. Pastikan Google Sheets diset **"Anyone with link can view"**
 2. Set environment variable di Nhost: `GOOGLE_SHEETS_ID=<id-spreadsheet>`
