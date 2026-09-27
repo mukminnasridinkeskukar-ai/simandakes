@@ -12,7 +12,7 @@ const BACKEND_MODE = localStorage.getItem('simandakes_backend_mode') || 'nhost';
 // ==================== KONFIGURASI NHOST ====================
 const NHOST_CONFIG = {
     // Format: https://xxxxxxxxxxxxx.nhost.run
-    BACKEND_URL: localStorage.getItem('simandakes_nhost_url') || 'https://YOUR-PROJECT-SUBDOMAIN.nhost.run',
+    BACKEND_URL: localStorage.getItem('simandakes_nhost_url') || 'https://ropxcexlewwkfyjsftus.hasura.ap-southeast-1.nhost.run',
 
     // Admin secret (untuk development/testing — JANGAN di-commit ke repo publik di production)
     ADMIN_SECRET: '',
