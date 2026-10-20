@@ -156,13 +156,79 @@ async function getFromSheet(action) {
 }
 
 /**
+ * Helper: parse error dari Nhost GraphQL supaya pesannya user-friendly.
+ * Mendeteksi 3 masalah umum:
+ *   1. Tabel belum di-track di Hasura  → "field 'xxx' not found in type: 'query_root'"
+ *   2. Backend URL belum dikonfigurasi → "Nhost BACKEND_URL belum dikonfigurasi"
+ *   3. Network error / CORS            → "Failed to fetch"
+ */
+function parseNhostError(error, tableName) {
+    const msg = (error && error.message) ? error.message : String(error);
+
+    // Tabel belum di-track di Hasura
+    if (msg.includes("not found in type: 'query_root'") || msg.includes('no_queries_available')) {
+        return {
+            type: 'UNTRACKED_TABLE',
+            userMessage: `Tabel '${tableName}' belum di-track di Hasura. ` +
+                         `Buka Nhost Console → Hasura Console → tab Data → klik "Track" pada tabel ${tableName}. ` +
+                         `Atau pakai tombol "Track All Tables" untuk track semua tabel sekaligus.`,
+            rawError: msg,
+        };
+    }
+
+    // Backend URL belum dikonfigurasi
+    if (msg.includes('YOUR-PROJECT-SUBDOMAIN') || msg.includes('BACKEND_URL belum dikonfigurasi')) {
+        return {
+            type: 'NO_BACKEND_URL',
+            userMessage: 'Nhost BACKEND_URL belum dikonfigurasi. Set di js/config.js atau via localStorage: ' +
+                         "localStorage.setItem('simandakes_nhost_url', 'https://project-anda.nhost.run')",
+            rawError: msg,
+        };
+    }
+
+    // Network / CORS error
+    if (msg.includes('Failed to fetch') || msg.includes('NetworkError') || msg.includes('HTTP 0')) {
+        return {
+            type: 'NETWORK_ERROR',
+            userMessage: 'Gagal terhubung ke Nhost. Cek: (1) koneksi internet, (2) URL benar di js/config.js, ' +
+                         '(3) project Nhost tidak sedang pause/sleep.',
+            rawError: msg,
+        };
+    }
+
+    // Auth / permission error
+    if (msg.includes('JWT') || msg.includes('permission') || msg.includes('unauthorized')) {
+        return {
+            type: 'AUTH_ERROR',
+            userMessage: 'Akses ditolak (permission denied). Set role anonymous di Hasura Console → Data → ' +
+                         'tabel → Permissions → tambah role "anonymous" dengan select permission.',
+            rawError: msg,
+        };
+    }
+
+    // Default: unknown error
+    return {
+        type: 'UNKNOWN',
+        userMessage: `Error sync ${tableName}: ${msg}`,
+        rawError: msg,
+    };
+}
+
+/**
+ * Helper: tampilkan error dengan notifikasi yang lebih informatif
+ */
+function showNhostError(parsedError, tableName) {
+    console.error(`❌ [${parsedError.type}] ${tableName}:`, parsedError.rawError);
+    showNotification(parsedError.userMessage, 'error');
+}
+
+/**
  * Sync data Nakes dari Nhost.
  * Tabel: data_nakes
  */
 async function syncNakesData() {
-    // === NHOST ONLY: tidak ada fallback Google Sheets / mock data ===
     if (!window.nhostClient) {
-        console.error('nhostClient tidak tersedia.');
+        console.error('nhostClient tidak tersedia. Pastikan js/nhost-client.js di-load.');
         state.sheetConnected = false;
         return false;
     }
@@ -180,7 +246,8 @@ async function syncNakesData() {
         updateHeroStats();
         return true;
     } catch (error) {
-        console.error('Nhost sync Nakes error:', error);
+        const parsed = parseNhostError(error, 'data_nakes');
+        showNhostError(parsed, 'data_nakes');
         state.sheetConnected = false;
         state.syncStatus = 'idle';
         updateSyncUI();
@@ -277,7 +344,6 @@ function authenticateUser(username, password) {
  * Tabel: institusi_named
  */
 async function syncNamedData() {
-    // === NHOST ONLY ===
     if (!window.nhostClient) {
         console.error('nhostClient tidak tersedia.');
         state.sheetConnected = false;
@@ -291,7 +357,8 @@ async function syncNamedData() {
         state.sheetConnected = true;
         return true;
     } catch (error) {
-        console.error('Nhost sync Named error:', error);
+        const parsed = parseNhostError(error, 'institusi_named');
+        showNhostError(parsed, 'institusi_named');
         state.sheetConnected = false;
         return false;
     }
@@ -302,7 +369,6 @@ async function syncNamedData() {
  * Tabel: institusi_nakes (agregat perawat/bidan/apoteker/lainnya per institusi)
  */
 async function syncInstitusiNakesData() {
-    // === NHOST ONLY ===
     if (!window.nhostClient) {
         console.error('nhostClient tidak tersedia.');
         state.sheetConnected = false;
@@ -316,7 +382,8 @@ async function syncInstitusiNakesData() {
         state.sheetConnected = true;
         return true;
     } catch (error) {
-        console.error('Nhost sync InstitusiNakes error:', error);
+        const parsed = parseNhostError(error, 'institusi_nakes');
+        showNhostError(parsed, 'institusi_nakes');
         state.sheetConnected = false;
         return false;
     }

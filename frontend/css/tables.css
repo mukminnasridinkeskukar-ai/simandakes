@@ -1,0 +1,8 @@
+/* Tables */
+        /* ==================== TABLE ==================== */
+        .table-container { overflow-x: auto; }
+        table { width: 100%; border-collapse: collapse; }
+        th, td { padding: 12px; text-align: left; border-bottom: 1px solid var(--gray-100); }
+        th { font-weight: 600; color: var(--gray-600); font-size: 13px; text-transform: uppercase; }
+        tr:hover { background: var(--gray-50); }
+        
