@@ -45,10 +45,17 @@ CREATE EXTENSION IF NOT EXISTS "pg_trgm";  -- untuk fuzzy search nama
 DO $$ BEGIN
     CREATE TYPE public.nakes_jenis AS ENUM (
         'Dokter',
+        'Dokter Spesialis',
         'Dokter Gigi',
+        'Dokter Gigi Spesialis',
         'Bidan',
         'Perawat',
         'Apoteker',
+        'Fisioterapis',
+        'Psikolog Klinis',
+        'Terapis Wicara',
+        'Okupasi Terapis',
+        'Terapis Gigi dan Mulut',
         'Tenaga Kesehatan Lainnya'
     );
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;
@@ -243,15 +250,39 @@ ON CONFLICT (username) DO NOTHING;
 -- 9. SAMPLE DATA NAKES (untuk demo — hapus di production)
 -- =============================================================
 INSERT INTO public.data_nakes (legacy_id, nama, jenis, spesialisasi, str, sip, alamat_praktik, jadwal_praktik, no_telepon, email, status, foto_url, alamat_google_maps) VALUES
-    ('NK001', 'dr. Ahmad Fauzi, Sp.PD',     'Dokter',     'Penyakit Dalam',  'STR-001', 'SIP-001', 'Jl. Merdeka No. 10, Jakarta Pusat',  'Senin-Jumat 08:00-14:00', '081234567001', 'ahmad.fauzi@simandakes.id',  'aktif',     NULL, 'https://www.google.com/maps?q=Jl+Merdeka+10+Jakarta'),
-    ('NK002', 'dr. Siti Aminah, Sp.A',     'Dokter',     'Anak',           'STR-002', 'SIP-002', 'Jl. Sudirman No. 25, Jakarta Selatan','Senin-Sabtu 09:00-15:00', '081234567002', 'siti.aminah@simandakes.id', 'aktif',     NULL, 'https://www.google.com/maps?q=Jl+Sudirman+25+Jakarta'),
-    ('NK003', 'drg. Budi Hartono',         'Dokter Gigi','Umum',           'STR-003', 'SIP-003', 'Jl. Gatot Subroto No. 5, Bandung',   'Senin-Jumat 10:00-17:00', '081234567003', 'budi.hartono@simandakes.id','aktif',     NULL, 'https://www.google.com/maps?q=Jl+Gatot+Subroto+5+Bandung'),
-    ('NK004', 'Bidan Aisyah Putri, S.Keb', 'Bidan',      'Kebidanan',      'STR-004', 'SIP-004', 'Jl. Diponegoro No. 15, Surabaya',    'Setiap hari 08:00-20:00', '081234567004', 'aisyah.putri@simandakes.id','aktif',    NULL, 'https://www.google.com/maps?q=Jl+Diponegoro+15+Surabaya'),
-    ('NK005', 'Bidan Fatimah Zahra, S.Keb', 'Bidan',     'Kebidanan',      'STR-005', 'SIP-005', 'Jl. Pahlawan No. 22, Semarang',      'Senin-Sabtu 09:00-18:00', '081234567005', 'fatimah.zahra@simandakes.id','aktif',   NULL, 'https://www.google.com/maps?q=Jl+Pahlawan+22+Semarang'),
-    ('NK006', 'Ns. Dewi Lestari, S.Kep',    'Perawat',    'Keperawatan',    'STR-006', 'SIP-006', 'Jl. Kartini No. 8, Yogyakarta',      'Shift pagi-sore',        '081234567006', 'dewi.lestari@simandakes.id','aktif',     NULL, 'https://www.google.com/maps?q=Jl+Kartini+8+Yogyakarta'),
-    ('NK007', 'Ns. Rina Marlina, S.Kep',   'Perawat',    'Keperawatan',    'STR-007', 'SIP-007', 'Jl. Ahmad Yani No. 19, Malang',      'Shift malam',            '081234567007', 'rina.marlina@simandakes.id','aktif',    NULL, 'https://www.google.com/maps?q=Jl+Ahmad+Yani+19+Malang'),
-    ('NK008', 'Apt. Hendra Wijaya, S.Farm', 'Apoteker',  'Farmasi',        'STR-008', 'SIP-008', 'Jl. Gajah Mada No. 33, Medan',        'Senin-Sabtu 08:00-21:00', '081234567008', 'hendra.wijaya@simandakes.id','aktif',   NULL, 'https://www.google.com/maps?q=Jl+Gajah+Mada+33+Medan'),
-    ('NK009', 'Apt. Lia Anggraini, S.Farm', 'Apoteker',   'Farmasi',        'STR-009', 'SIP-009', 'Jl. Veteran No. 12, Makassar',       'Senin-Jumat 09:00-17:00', '081234567009', 'lia.anggraini@simandakes.id','aktif',   NULL, 'https://www.google.com/maps?q=Jl+Veteran+12+Makassar')
+    -- Dokter Spesialis
+    ('NK001', 'dr. Ahmad Fauzi, Sp.PD',     'Dokter Spesialis', 'Penyakit Dalam',  'STR-001', 'SIP-001', 'Jl. Merdeka No. 10, Jakarta Pusat',  'Senin-Jumat 08:00-14:00', '081234567001', 'ahmad.fauzi@simandakes.id',  'aktif',     NULL, 'https://www.google.com/maps?q=Jl+Merdeka+10+Jakarta'),
+    ('NK002', 'dr. Siti Aminah, Sp.A',     'Dokter Spesialis', 'Anak',           'STR-002', 'SIP-002', 'Jl. Sudirman No. 25, Jakarta Selatan','Senin-Sabtu 09:00-15:00', '081234567002', 'siti.aminah@simandakes.id', 'aktif',     NULL, 'https://www.google.com/maps?q=Jl+Sudirman+25+Jakarta'),
+    ('NK003', 'dr. Bambang Sutrisno, Sp.B', 'Dokter Spesialis', 'Bedah',          'STR-003', 'SIP-003', 'Jl. Pahlawan No. 5, Bandung',         'Senin-Jumat 10:00-16:00', '081234567003', 'bambang.s@simandakes.id',   'aktif',     NULL, 'https://www.google.com/maps?q=Jl+Pahlawan+5+Bandung'),
+    -- Dokter Gigi Spesialis
+    ('NK004', 'drg. Dewi Saraswati, Sp.Ort', 'Dokter Gigi Spesialis', 'Ortodonsia', 'STR-004', 'SIP-004', 'Jl. Diponegoro No. 8, Surabaya',     'Senin-Jumat 09:00-17:00', '081234567004', 'dewi.s@dgsimandakes.id',    'aktif',     NULL, 'https://www.google.com/maps?q=Jl+Diponegoro+8+Surabaya'),
+    ('NK005', 'drg. Hendra Kusuma, Sp.Pros', 'Dokter Gigi Spesialis', 'Prostodonsia', 'STR-005', 'SIP-005', 'Jl. Gatot Subroto No. 12, Bandung','Selasa-Sabtu 10:00-18:00', '081234567005', 'hendra.k@dgsimandakes.id',  'aktif',     NULL, 'https://www.google.com/maps?q=Jl+Gatot+Subroto+12+Bandung'),
+    -- Dokter Umum
+    ('NK006', 'dr. Rina Wati',              'Dokter',           'Umum',           'STR-006', 'SIP-006', 'Jl. Kartini No. 22, Semarang',        'Senin-Jumat 08:00-14:00', '081234567006', 'rina.wati@simandakes.id',   'aktif',     NULL, 'https://www.google.com/maps?q=Jl+Kartini+22+Semarang'),
+    ('NK007', 'dr. Joko Susilo',             'Dokter',           'Umum',           'STR-007', 'SIP-007', 'Jl. Ahmad Yani No. 19, Malang',       'Setiap hari 08:00-20:00', '081234567007', 'joko.susilo@simandakes.id','aktif',     NULL, 'https://www.google.com/maps?q=Jl+Ahmad+Yani+19+Malang'),
+    -- Dokter Gigi Umum
+    ('NK008', 'drg. Budi Hartono',           'Dokter Gigi',      'Umum',           'STR-008', 'SIP-008', 'Jl. Pemuda No. 33, Medan',             'Senin-Sabtu 09:00-15:00', '081234567008', 'budi.hartono@simandakes.id','aktif',    NULL, 'https://www.google.com/maps?q=Jl+Pemuda+33+Medan'),
+    -- Bidan
+    ('NK009', 'Bidan Aisyah Putri, S.Keb',   'Bidan',            'Kebidanan',      'STR-009', 'SIP-009', 'Jl. Diponegoro No. 15, Surabaya',     'Setiap hari 08:00-20:00', '081234567009', 'aisyah.putri@simandakes.id','aktif',    NULL, 'https://www.google.com/maps?q=Jl+Diponegoro+15+Surabaya'),
+    ('NK010', 'Bidan Fatimah Zahra, S.Keb',  'Bidan',            'Kebidanan',      'STR-010', 'SIP-010', 'Jl. Pahlawan No. 22, Semarang',       'Senin-Sabtu 09:00-18:00', '081234567010', 'fatimah.zahra@simandakes.id','aktif',   NULL, 'https://www.google.com/maps?q=Jl+Pahlawan+22+Semarang'),
+    -- Perawat
+    ('NK011', 'Ns. Dewi Lestari, S.Kep',     'Perawat',          'Keperawatan',    'STR-011', 'SIP-011', 'Jl. Kartini No. 8, Yogyakarta',       'Shift pagi-sore',        '081234567011', 'dewi.lestari@simandakes.id','aktif',     NULL, 'https://www.google.com/maps?q=Jl+Kartini+8+Yogyakarta'),
+    ('NK012', 'Ns. Rina Marlina, S.Kep',     'Perawat',          'Keperawatan',    'STR-012', 'SIP-012', 'Jl. Ahmad Yani No. 19, Malang',       'Shift malam',            '081234567012', 'rina.marlina@simandakes.id','aktif',    NULL, 'https://www.google.com/maps?q=Jl+Ahmad+Yani+19+Malang'),
+    -- Apoteker
+    ('NK013', 'Apt. Hendra Wijaya, S.Farm',  'Apoteker',         'Farmasi',        'STR-013', 'SIP-013', 'Jl. Gajah Mada No. 33, Medan',         'Senin-Sabtu 08:00-21:00', '081234567013', 'hendra.wijaya@simandakes.id','aktif',   NULL, 'https://www.google.com/maps?q=Jl+Gajah+Mada+33+Medan'),
+    ('NK014', 'Apt. Lia Anggraini, S.Farm',  'Apoteker',         'Farmasi',        'STR-014', 'SIP-014', 'Jl. Veteran No. 12, Makassar',        'Senin-Jumat 09:00-17:00', '081234567014', 'lia.anggraini@simandakes.id','aktif',   NULL, 'https://www.google.com/maps?q=Jl+Veteran+12+Makassar'),
+    -- Fisioterapis
+    ('NK015', 'Yoga Pratama, S.Ft',          'Fisioterapis',     'Rehabilitasi Fisik', 'STR-015', 'SIP-015', 'Jl. Cendrawasih No. 7, Bali',      'Senin-Jumat 10:00-18:00', '081234567015', 'yoga.pratama@simandakes.id','aktif',    NULL, 'https://www.google.com/maps?q=Jl+Cendrawasih+7+Bali'),
+    ('NK016', 'Sari Indah, S.Ft',            'Fisioterapis',     'Olahraga',       'STR-016', 'SIP-016', 'Jl. Melati No. 3, Bandung',           'Senin-Sabtu 09:00-16:00', '081234567016', 'sari.indah@simandakes.id', 'aktif',     NULL, 'https://www.google.com/maps?q=Jl+Melati+3+Bandung'),
+    -- Psikolog Klinis
+    ('NK017', 'Andi Wijaya, M.Psi, Psikolog', 'Psikolog Klinis', 'Klinis Dewasa',  'STR-017', 'SIP-017', 'Jl. Cipta No. 11, Jakarta Selatan',   'Senin-Jumat 13:00-20:00', '081234567017', 'andi.w@simandakes.id',     'aktif',     NULL, 'https://www.google.com/maps?q=Jl+Cipta+11+Jakarta'),
+    ('NK018', 'Maya Sari, M.Psi, Psikolog',  'Psikolog Klinis',  'Anak & Remaja',  'STR-018', 'SIP-018', 'Jl. Bunga No. 9, Surabaya',           'Selasa-Sabtu 10:00-17:00', '081234567018', 'maya.sari@simandakes.id','aktif',     NULL, 'https://www.google.com/maps?q=Jl+Bunga+9+Surabaya'),
+    -- Terapis Wicara
+    ('NK019', 'Rini Astuti, S.Ter.Wic',      'Terapis Wicara',   'Komunikasi & Bicara', 'STR-019', 'SIP-019', 'Jl. Anggrek No. 4, Bandung',     'Senin-Jumat 09:00-15:00', '081234567019', 'rini.astuti@simandakes.id','aktif',    NULL, 'https://www.google.com/maps?q=Jl+Anggrek+4+Bandung'),
+    -- Okupasi Terapis
+    ('NK020', 'Dewi Utami, S.OT',            'Okupasi Terapis',  'Rehabilitasi ADL', 'STR-020', 'SIP-020', 'Jl. Mawar No. 6, Jakarta',         'Senin-Sabtu 10:00-16:00', '081234567020', 'dewi.utami@simandakes.id','aktif',    NULL, 'https://www.google.com/maps?q=Jl+Mawar+6+Jakarta'),
+    -- Terapis Gigi dan Mulut
+    ('NK021', 'Siti Halimah, Amd.G',         'Terapis Gigi dan Mulut', 'Hygienist', 'STR-021', 'SIP-021', 'Jl. Kenanga No. 8, Medan',         'Senin-Jumat 08:00-14:00', '081234567021', 'siti.halimah@simandakes.id','aktif',  NULL, 'https://www.google.com/maps?q=Jl+Kenanga+8+Medan')
 ON CONFLICT (legacy_id) DO NOTHING;
 
 -- =============================================================

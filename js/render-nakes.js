@@ -201,21 +201,20 @@ function renderEmptyState(title, emoji, subtitle, color, sheetName) {
                 <div style="width:80px;height:80px;background:${color}15;border-radius:20px;display:flex;align-items:center;justify-content:center;margin:0 auto 24px;font-size:36px;">
                     ${emoji}
                 </div>
-                <h2 style="font-size:24px;font-weight:700;color:#111827;margin-bottom:8px;">Data ${title} Tersedia</h2>
+                <h2 style="font-size:24px;font-weight:700;color:#111827;margin-bottom:8px;">Data ${title} Belum Tersedia</h2>
                 <p style="color:#6b7280;font-size:15px;margin-bottom:24px;line-height:1.6;">
-                    Data dari ${sheetName} belum dimuat atau kosong.<br>
-                    Pastikan sheet "${sheetName}" sudah ada di Google Sheets dan berisi data.
+                    Data ${title.toLowerCase()} belum termuat dari Nhost.<br>
+                    Pastikan tabel <code>${sheetName}</code> sudah berisi data dan ter-track di Hasura Console.
                 </p>
                 <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap;">
-                    <button onclick="syncAndRender('${title.toLowerCase()}')" class="btn btn-primary">
+                    <button onclick="renderCurrentView()" class="btn btn-primary">
                         <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
-                        Sync Ulang Data
-                    </button>
-                    <button onclick="renderCurrentView()" class="btn btn-secondary">
-                        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
-                        Refresh Halaman
+                        Muat Ulang
                     </button>
                 </div>
+                <p style="color:#9ca3af;font-size:12px;margin-top:16px;">
+                    💡 Data otomatis dimuat dari Nhost saat halaman dibuka. Tidak perlu sync manual.
+                </p>
             </div>
         </div>
     `;

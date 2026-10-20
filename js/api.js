@@ -148,8 +148,8 @@ function showUrlConfigModal() {
                     <button class="btn btn-outline" onclick="document.getElementById('urlConfigModal').remove()">
                         Tutup
                     </button>
-                    <button class="btn btn-primary" onclick="if(saveWebAppUrl(document.getElementById('webAppUrlInput').value)){document.getElementById('urlConfigModal').remove();syncAllData();}">
-                        💾 Simpan & Sync
+                    <button class="btn btn-primary" onclick="if(saveWebAppUrl(document.getElementById('webAppUrlInput').value)){document.getElementById('urlConfigModal').remove();location.reload();}">
+                        💾 Simpan & Muat Ulang
                     </button>
                 </div>
             </div>

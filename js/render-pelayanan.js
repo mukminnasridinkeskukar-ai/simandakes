@@ -9,14 +9,33 @@
  * Get profesi color configuration
  */
 function getProfesiConfig(jenis) {
+    const j = (jenis || '').toLowerCase().trim();
     const configs = {
-        'dokter': { bg: '#eef2ff', color: '#4f46e5', badge: 'badge-blue', icon: '👨‍⚕️', label: 'Dokter' },
-        'dokter gigi': { bg: '#cffafe', color: '#0891b2', badge: 'badge-cyan', icon: '🦷', label: 'Dokter Gigi' },
-        'bidan': { bg: '#fce7f3', color: '#ec4899', badge: 'badge-pink', icon: '🤱', label: 'Bidan' },
-        'perawat': { bg: '#f3e8ff', color: '#a855f7', badge: 'badge-purple', icon: '💉', label: 'Perawat' },
-        'apoteker': { bg: '#fef9c3', color: '#ca8a04', badge: 'badge-yellow', icon: '💊', label: 'Apoteker' }
+        // Tenaga Medis
+        'dokter umum':              { bg: '#eef2ff', color: '#4f46e5', badge: 'badge-blue',   icon: '👨‍⚕️', label: 'Dokter Umum' },
+        'dokter':                   { bg: '#eef2ff', color: '#4f46e5', badge: 'badge-blue',   icon: '👨‍⚕️', label: 'Dokter' },
+        'dokter spesialis':         { bg: '#eef2ff', color: '#312e81', badge: 'badge-blue',   icon: '👨‍⚕️', label: 'Dokter Spesialis' },
+        'dokter gigi':              { bg: '#cffafe', color: '#0891b2', badge: 'badge-cyan',   icon: '🦷', label: 'Dokter Gigi' },
+        'dokter gigi spesialis':    { bg: '#cffafe', color: '#0e7490', badge: 'badge-cyan',   icon: '🦷', label: 'Dokter Gigi Spesialis' },
+
+        // Tenaga Kesehatan
+        'bidan':                    { bg: '#fce7f3', color: '#ec4899', badge: 'badge-pink',   icon: '🤱', label: 'Bidan' },
+        'perawat':                  { bg: '#f3e8ff', color: '#a855f7', badge: 'badge-purple', icon: '💉', label: 'Perawat' },
+        'apoteker':                 { bg: '#fef9c3', color: '#ca8a04', badge: 'badge-yellow', icon: '💊', label: 'Apoteker' },
+        'fisioterapis':             { bg: '#dbeafe', color: '#1e40af', badge: 'badge-blue',   icon: '🏃', label: 'Fisioterapis' },
+        'psikolog klinis':          { bg: '#ede9fe', color: '#7c3aed', badge: 'badge-purple', icon: '🧠', label: 'Psikolog Klinis' },
+        'psikolog':                 { bg: '#ede9fe', color: '#7c3aed', badge: 'badge-purple', icon: '🧠', label: 'Psikolog' },
+        'terapis wicara':           { bg: '#fce7f3', color: '#be185d', badge: 'badge-pink',   icon: '💬', label: 'Terapis Wicara' },
+        'okupasi terapis':          { bg: '#fef3c7', color: '#92400e', badge: 'badge-yellow', icon: '👐', label: 'Okupasi Terapis' },
+        'terapis gigi mulut':       { bg: '#cffafe', color: '#0891b2', badge: 'badge-cyan',   icon: '🦷', label: 'Terapis Gigi & Mulut' },
+        'terapis gigi dan mulut':   { bg: '#cffafe', color: '#0891b2', badge: 'badge-cyan',   icon: '🦷', label: 'Terapis Gigi & Mulut' },
     };
-    return configs[jenis?.toLowerCase()] || { bg: '#f3f4f6', color: '#6b7280', badge: 'badge-gray', icon: '🏥', label: jenis || 'Nakes' };
+    // Cari exact match dulu, kalau tidak ada cari partial match
+    if (configs[j]) return configs[j];
+    for (const key of Object.keys(configs)) {
+        if (j.includes(key)) return configs[key];
+    }
+    return { bg: '#f3f4f6', color: '#6b7280', badge: 'badge-gray', icon: '🏥', label: jenis || 'Nakes' };
 }
 
 /**
@@ -207,19 +226,33 @@ function renderPelayananCard(type, title, subtitle, primaryColor, bgColor, emoji
     let filtered = state.cachedNakesData;
     
     // Mapping profesi - handle berbagai variasi penulisan
+    // Filter pakai INCLUDES, jadi urutan keyword penting:
+    // - keyword yang lebih spesifik dulu (mis. 'dokter spesialis' sebelum 'dokter')
+    // - filter() pakai keywords.some() → match bila SALAH SATU keyword ketemu
     const profesiMap = {
-        'dokter': ['dokter', 'dr.', 'dr', 'doctor'],
-        'dokter gigi': ['dokter gigi', 'drg.', 'drg', 'gigi'],
-        'bidan': ['bidan', 'bdn'],
-        'perawat': ['perawat', 'ns.', 'ns', 'nrs'],
-        'apoteker': ['apoteker', 'apt.', 'apt'],
+        // Tenaga Medis
+        'dokter spesialis':         ['sp.', 'spesialis', 'dokter spesialis', 'dr. sp', 'dr.sp'],
+        'dokter gigi spesialis':    ['drg. sp', 'drg.sp', 'sp.kg', 'sp. ort', 'sp. pros', 'sp. perio', 'sp. kg', 'dokter gigi spesialis', 'spesialis gigi'],
+        'dokter umum':              ['dokter umum', 'dr. umum', 'general practitioner'],
+        'dokter':                   ['dokter', 'dr.', 'dr ', 'doctor'],
+        'dokter gigi':              ['dokter gigi', 'drg.', 'drg ', 'gigi'],
+        // Tenaga Kesehatan
+        'bidan':                    ['bidan', 'bdn', 's.keb', 'kebidanan'],
+        'perawat':                  ['perawat', 'ns.', 'ns ', 'nrs', 's.kep', 'keperawatan'],
+        'apoteker':                 ['apoteker', 'apt.', 'apt ', 's.farm', 'farmasi'],
+        'fisioterapis':             ['fisioterapis', 'fisio', 's.ft', 'terapi fisik', 'rehabilitasi fisik'],
+        'psikolog klinis':          ['psikolog klinis', 'psikolog', 'm.psi', 's.psi', 'psychologist'],
+        'terapis wicara':           ['terapis wicara', 'speech therapist', 'terapi bicara', 'terapi wicara'],
+        'okupasi terapis':          ['okupasi terapis', 'occupational therapist', 'terapi okupasi', 'okupasi'],
+        'terapis gigi mulut':       ['terapis gigi', 'terapis gigi mulut', 'terapis gigi dan mulut', 'dental hygienist'],
         'all': []
     };
-    
+
     if (type !== 'all' && profesiMap[type]) {
         const keywords = profesiMap[type];
         filtered = filtered.filter(n => {
-            const jenis = (n.jenis || '').toLowerCase().trim();
+            // Cari di kolom jenis ATAU spesialisasi (lebih fleksibel)
+            const jenis = ((n.jenis || '') + ' ' + (n.spesialisasi || '')).toLowerCase().trim();
             return keywords.some(kw => jenis.includes(kw));
         });
     }
@@ -247,15 +280,27 @@ function renderPelayananCard(type, title, subtitle, primaryColor, bgColor, emoji
     const aktifCount = filtered.filter(n => n.status === 'aktif').length;
     
     // Hitung statistik per profesi dari SEMUA data (bukan filtered)
+    // Pakai helper filter supaya konsisten dengan profesiMap
     const allData = state.cachedNakesData;
-    const stats = {
-        dokter: allData.filter(n => ['dokter','dr.','dr'].some(k => (n.jenis||'').toLowerCase().includes(k))).length,
-        'dokter gigi': allData.filter(n => ['dokter gigi','drg.','drg'].some(k => (n.jenis||'').toLowerCase().includes(k))).length,
-        bidan: allData.filter(n => ['bidan','bdn'].some(k => (n.jenis||'').toLowerCase().includes(k))).length,
-        perawat: allData.filter(n => ['perawat','ns.','ns'].some(k => (n.jenis||'').toLowerCase().includes(k))).length,
-        apoteker: allData.filter(n => ['apoteker','apt.','apt'].some(k => (n.jenis||'').toLowerCase().includes(k))).length
+    const matchKw = (n, kws) => {
+        const jenis = ((n.jenis || '') + ' ' + (n.spesialisasi || '')).toLowerCase();
+        return kws.some(k => jenis.includes(k));
     };
-    
+    const stats = {
+        dokterSpesialis:     allData.filter(n => matchKw(n, ['sp.', 'spesialis', 'dr. sp', 'dr.sp'])).length,
+        dokterGigiSpesialis: allData.filter(n => matchKw(n, ['drg. sp', 'drg.sp', 'sp.kg', 'sp. ort', 'sp. pros', 'sp. perio'])).length,
+        dokter:              allData.filter(n => matchKw(n, ['dokter', 'dr.', 'dr ', 'doctor'])).length,
+        dokterGigi:          allData.filter(n => matchKw(n, ['dokter gigi', 'drg.', 'drg ', 'gigi'])).length,
+        bidan:               allData.filter(n => matchKw(n, ['bidan', 'bdn', 's.keb', 'kebidanan'])).length,
+        perawat:             allData.filter(n => matchKw(n, ['perawat', 'ns.', 'ns ', 'nrs', 's.kep'])).length,
+        apoteker:            allData.filter(n => matchKw(n, ['apoteker', 'apt.', 'apt ', 's.farm'])).length,
+        fisioterapis:        allData.filter(n => matchKw(n, ['fisioterapis', 'fisio', 's.ft', 'terapi fisik'])).length,
+        psikolog:            allData.filter(n => matchKw(n, ['psikolog', 'm.psi', 's.psi', 'psychologist'])).length,
+        terapisWicara:       allData.filter(n => matchKw(n, ['terapis wicara', 'speech therapist', 'terapi bicara'])).length,
+        okupasiTerapis:      allData.filter(n => matchKw(n, ['okupasi terapis', 'occupational therapist', 'terapi okupasi'])).length,
+        terapisGigiMulut:    allData.filter(n => matchKw(n, ['terapis gigi', 'dental hygienist'])).length,
+    };
+
     return `
         <!-- Header Section -->
         <div style="margin-bottom:24px;">
@@ -282,32 +327,43 @@ function renderPelayananCard(type, title, subtitle, primaryColor, bgColor, emoji
             </div>
         </div>
 
-        <!-- Quick Stats Bar (Profesi Summary) -->
-        <div class="stats-grid" style="margin-bottom:24px;">
-            <div onclick="navigateTo('cari-dokter')" class="stat-card cursor-pointer" style="${type === 'dokter' ? `border-left:4px solid #4f46e5;background:#eef2ff;` : ''}">
-                <div class="stat-card-header">
-                    <div><p class="stat-card-label">👨‍⚕️ Dokter</p><p class="stat-card-value" style="color:#4f46e5;">${stats.dokter}</p></div>
-                </div>
+        <!-- Quick Stats Bar (Profesi Summary) — Klik untuk navigasi ke profesi terkait -->
+        <div class="stats-grid" style="margin-bottom:24px;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));">
+            <div onclick="navigateTo('cari-dokter-spesialis')" class="stat-card cursor-pointer" style="${type === 'dokter spesialis' ? `border-left:4px solid #312e81;background:#eef2ff;` : ''}">
+                <div class="stat-card-header"><div><p class="stat-card-label">👨‍⚕️ Dr. Spesialis</p><p class="stat-card-value" style="color:#312e81;">${stats.dokterSpesialis}</p></div></div>
+            </div>
+            <div onclick="navigateTo('cari-dokter-gigi-spesialis')" class="stat-card cursor-pointer" style="${type === 'dokter gigi spesialis' ? `border-left:4px solid #0e7490;background:#cffafe;` : ''}">
+                <div class="stat-card-header"><div><p class="stat-card-label">🦷 Dr. Gigi Spesialis</p><p class="stat-card-value" style="color:#0e7490;">${stats.dokterGigiSpesialis}</p></div></div>
+            </div>
+            <div onclick="navigateTo('cari-dokter')" class="stat-card cursor-pointer" style="${type === 'dokter umum' ? `border-left:4px solid #4f46e5;background:#eef2ff;` : ''}">
+                <div class="stat-card-header"><div><p class="stat-card-label">👨‍⚕️ Dokter Umum</p><p class="stat-card-value" style="color:#4f46e5;">${stats.dokter}</p></div></div>
             </div>
             <div onclick="navigateTo('cari-dokter-gigi')" class="stat-card cursor-pointer" style="${type === 'dokter gigi' ? `border-left:4px solid #0891b2;background:#cffafe;` : ''}">
-                <div class="stat-card-header">
-                    <div><p class="stat-card-label">🦷 Dokter Gigi</p><p class="stat-card-value" style="color:#0891b2;">${stats['dokter gigi']}</p></div>
-                </div>
+                <div class="stat-card-header"><div><p class="stat-card-label">🦷 Dokter Gigi</p><p class="stat-card-value" style="color:#0891b2;">${stats.dokterGigi}</p></div></div>
             </div>
             <div onclick="navigateTo('cari-bidan')" class="stat-card cursor-pointer" style="${type === 'bidan' ? `border-left:4px solid #ec4899;background:#fce7f3;` : ''}">
-                <div class="stat-card-header">
-                    <div><p class="stat-card-label">🤱 Bidan</p><p class="stat-card-value" style="color:#ec4899;">${stats.bidan}</p></div>
-                </div>
+                <div class="stat-card-header"><div><p class="stat-card-label">🤱 Bidan</p><p class="stat-card-value" style="color:#ec4899;">${stats.bidan}</p></div></div>
             </div>
             <div onclick="navigateTo('cari-perawat')" class="stat-card cursor-pointer" style="${type === 'perawat' ? `border-left:4px solid #a855f7;background:#f3e8ff;` : ''}">
-                <div class="stat-card-header">
-                    <div><p class="stat-card-label">💉 Perawat</p><p class="stat-card-value" style="color:#a855f7;">${stats.perawat}</p></div>
-                </div>
+                <div class="stat-card-header"><div><p class="stat-card-label">💉 Perawat</p><p class="stat-card-value" style="color:#a855f7;">${stats.perawat}</p></div></div>
             </div>
             <div onclick="navigateTo('cari-apoteker')" class="stat-card cursor-pointer" style="${type === 'apoteker' ? `border-left:4px solid #ca8a04;background:#fef9c3;` : ''}">
-                <div class="stat-card-header">
-                    <div><p class="stat-card-label">💊 Apoteker</p><p class="stat-card-value" style="color:#ca8a04;">${stats.apoteker}</p></div>
-                </div>
+                <div class="stat-card-header"><div><p class="stat-card-label">💊 Apoteker</p><p class="stat-card-value" style="color:#ca8a04;">${stats.apoteker}</p></div></div>
+            </div>
+            <div onclick="navigateTo('cari-fisioterapis')" class="stat-card cursor-pointer" style="${type === 'fisioterapis' ? `border-left:4px solid #1e40af;background:#dbeafe;` : ''}">
+                <div class="stat-card-header"><div><p class="stat-card-label">🏃 Fisioterapis</p><p class="stat-card-value" style="color:#1e40af;">${stats.fisioterapis}</p></div></div>
+            </div>
+            <div onclick="navigateTo('cari-psikolog-klinis')" class="stat-card cursor-pointer" style="${type === 'psikolog klinis' ? `border-left:4px solid #7c3aed;background:#ede9fe;` : ''}">
+                <div class="stat-card-header"><div><p class="stat-card-label">🧠 Psikolog Klinis</p><p class="stat-card-value" style="color:#7c3aed;">${stats.psikolog}</p></div></div>
+            </div>
+            <div onclick="navigateTo('cari-terapis-wicara')" class="stat-card cursor-pointer" style="${type === 'terapis wicara' ? `border-left:4px solid #be185d;background:#fce7f3;` : ''}">
+                <div class="stat-card-header"><div><p class="stat-card-label">💬 Terapis Wicara</p><p class="stat-card-value" style="color:#be185d;">${stats.terapisWicara}</p></div></div>
+            </div>
+            <div onclick="navigateTo('cari-okupasi-terapis')" class="stat-card cursor-pointer" style="${type === 'okupasi terapis' ? `border-left:4px solid #92400e;background:#fef3c7;` : ''}">
+                <div class="stat-card-header"><div><p class="stat-card-label">👐 Okupasi Terapis</p><p class="stat-card-value" style="color:#92400e;">${stats.okupasiTerapis}</p></div></div>
+            </div>
+            <div onclick="navigateTo('cari-terapis-gigi-mulut')" class="stat-card cursor-pointer" style="${type === 'terapis gigi mulut' ? `border-left:4px solid #0891b2;background:#cffafe;` : ''}">
+                <div class="stat-card-header"><div><p class="stat-card-label">🦷 Terapis Gigi & Mulut</p><p class="stat-card-value" style="color:#0891b2;">${stats.terapisGigiMulut}</p></div></div>
             </div>
         </div>
 

@@ -42,11 +42,18 @@ function navigateTo(view) {
     const titles = {
         'named': ['Named', 'Manajemen Data Nakes'],
         'nakes': ['Directory Nakes', 'Database Tenaga Kesehatan'],
-        'cari-dokter': ['Cari Dokter Praktik', 'Pencarian Dokter Sesuai Kebutuhan'],
-        'cari-dokter-gigi': ['Cari Dokter Gigi', 'Pencarian Dokter Gigi'],
-        'cari-bidan': ['Cari Bidan Praktik', 'Pencarian Bidan Terpercaya'],
-        'cari-perawat': ['Cari Perawat Praktik', 'Pencarian Perawat Profesional'],
+        'cari-dokter-spesialis': ['Cari Dokter Spesialis', 'Pencarian Dokter Spesialis'],
+        'cari-dokter-gigi-spesialis': ['Cari Dokter Gigi Spesialis', 'Pencarian Dokter Gigi Spesialis'],
+        'cari-dokter': ['Cari Dokter', 'Pencarian Dokter Umum'],
+        'cari-dokter-gigi': ['Cari Dokter Gigi', 'Pencarian Dokter Gigi Umum'],
+        'cari-bidan': ['Cari Bidan', 'Pencarian Bidan'],
+        'cari-perawat': ['Cari Perawat', 'Pencarian Perawat'],
         'cari-apoteker': ['Cari Apoteker', 'Pencarian Apoteker'],
+        'cari-fisioterapis': ['Cari Fisioterapis', 'Pencarian Fisioterapis'],
+        'cari-psikolog-klinis': ['Cari Psikolog Klinis', 'Pencarian Psikolog Klinis'],
+        'cari-terapis-wicara': ['Cari Terapis Wicara', 'Pencarian Terapis Wicara'],
+        'cari-okupasi-terapis': ['Cari Okupasi Terapis', 'Pencarian Okupasi Terapis'],
+        'cari-terapis-gigi-mulut': ['Cari Terapis Gigi & Mulut', 'Pencarian Terapis Gigi & Mulut'],
         'cari-praktik': ['Cari Praktik Nakes', 'Informasi Tempat Praktik'],
         'admin-dashboard': ['Panel Administrasi', 'Kelola Sistem SIMANDAKES']
     };
