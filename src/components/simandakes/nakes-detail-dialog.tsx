@@ -1,8 +1,9 @@
 'use client';
 
 // =============================================================
-// nakes-detail-dialog.tsx — big profile dialog for a single
-// Nakes (ported from openNakesProfileLightbox).
+// nakes-detail-dialog.tsx — big profile dialog for a single Nakes
+// (PRAKTIK MANDIRI). Profil menampilkan Daftar Layanan + tombol
+// pendaftaran ke platform e-Simantri (tanpa email/telepon).
 // =============================================================
 
 import type { LucideIcon } from 'lucide-react';
@@ -11,11 +12,12 @@ import {
   BadgeCheck,
   Building2,
   CalendarDays,
+  ExternalLink,
   FileText,
-  Mail,
+  Home,
+  ListChecks,
   MapPin,
   Navigation,
-  Phone,
   Sparkles,
 } from 'lucide-react';
 import {
@@ -29,6 +31,7 @@ import { Button } from '@/components/ui/button';
 import type { Nakes } from './types';
 import { getProfesiConfig, getStatusBadge } from './profesi';
 import { NakesAvatar } from './nakes-avatar';
+import { ESIMANTRI_LABEL, ESIMANTRI_URL, parseDaftarLayanan } from './config';
 import { cn } from '@/lib/utils';
 
 interface NakesDetailDialogProps {
@@ -49,6 +52,7 @@ export function NakesDetailDialog({ nakes, open, onOpenChange }: NakesDetailDial
   if (!nakes) return null;
   const config = getProfesiConfig(nakes.jenis);
   const statusBadge = getStatusBadge(nakes.status);
+  const layanan = parseDaftarLayanan(nakes.daftarLayanan);
 
   const rows: DataRow[] = [
     { icon: Building2, label: 'Jenis Profesi', value: `${config.icon} ${config.label}`, accent: config.color },
@@ -57,8 +61,6 @@ export function NakesDetailDialog({ nakes, open, onOpenChange }: NakesDetailDial
     { icon: Award, label: 'No. SIP', value: nakes.sip || '-', accent: '#059669' },
     { icon: MapPin, label: 'Alamat Praktik', value: nakes.alamatPraktik || '-', accent: '#dc2626', full: true },
     { icon: CalendarDays, label: 'Jadwal Praktik', value: nakes.jadwalPraktik || '-', accent: '#f59e0b', full: true },
-    { icon: Phone, label: 'Telepon', value: nakes.noTelepon || '-', accent: '#0891b2' },
-    { icon: Mail, label: 'Email', value: nakes.email || '-', accent: '#7c3aed' },
   ];
 
   return (
@@ -66,7 +68,7 @@ export function NakesDetailDialog({ nakes, open, onOpenChange }: NakesDetailDial
       <DialogContent aria-describedby={undefined} className="max-h-[85vh] max-w-xl overflow-y-auto p-0 sm:max-w-xl">
         <DialogHeader className="sr-only">
           <DialogTitle>Detail {nakes.nama}</DialogTitle>
-          <DialogDescription>Informasi lengkap tenaga kesehatan</DialogDescription>
+          <DialogDescription>Informasi lengkap praktik mandiri tenaga kesehatan</DialogDescription>
         </DialogHeader>
 
         {/* Header with photo */}
@@ -80,6 +82,12 @@ export function NakesDetailDialog({ nakes, open, onOpenChange }: NakesDetailDial
             {nakes.spesialisasi || config.label}
           </p>
           <div className="mt-3 flex flex-wrap justify-center gap-2">
+            <span
+              className="inline-flex items-center gap-1.5 rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1 text-xs font-medium text-emerald-700"
+            >
+              <Home className="size-3" aria-hidden />
+              Praktik Mandiri
+            </span>
             <span
               className="inline-flex items-center rounded-full px-3 py-1 text-xs font-medium"
               style={{ background: config.bg, color: config.color }}
@@ -114,25 +122,62 @@ export function NakesDetailDialog({ nakes, open, onOpenChange }: NakesDetailDial
                 <p className="mt-1 text-sm leading-relaxed font-medium break-words text-gray-900">{row.value}</p>
               </div>
             ))}
+
+            {/* Daftar Layanan (menggantikan email & telepon) */}
+            <div className="rounded-lg border border-gray-100 bg-gray-50/60 p-3 sm:col-span-2" style={{ borderLeft: '3px solid #059669' }}>
+              <p className="flex items-center gap-1.5 text-[11px] font-medium tracking-wide text-gray-500 uppercase">
+                <ListChecks className="size-3.5" aria-hidden />
+                Daftar Layanan
+              </p>
+              {layanan.length > 0 ? (
+                <div className="mt-2 flex flex-wrap gap-1.5">
+                  {layanan.map((item) => (
+                    <span
+                      key={item}
+                      className="inline-flex max-w-full items-center rounded-full border border-emerald-100 bg-emerald-50 px-2.5 py-1 text-xs font-medium text-emerald-800"
+                    >
+                      <span className="truncate">{item}</span>
+                    </span>
+                  ))}
+                </div>
+              ) : (
+                <p className="mt-1 text-sm font-medium text-gray-400">Belum ada layanan yang didaftarkan</p>
+              )}
+            </div>
           </div>
 
-          {nakes.alamatGoogleMaps ? (
+          {/* Action buttons */}
+          <div className="mt-4 grid grid-cols-1 gap-2.5 sm:grid-cols-2">
             <Button
               type="button"
-              className="mt-4 h-11 w-full bg-emerald-600 text-white hover:bg-emerald-700 sm:w-auto"
-              onClick={() => window.open(nakes.alamatGoogleMaps as string, '_blank', 'noopener,noreferrer')}
+              className="h-11 w-full bg-emerald-600 text-white hover:bg-emerald-700"
+              onClick={() => window.open(ESIMANTRI_URL, '_blank', 'noopener,noreferrer')}
             >
-              <Navigation className="size-4" aria-hidden />
-              Buka di Google Maps
+              <ExternalLink className="size-4" aria-hidden />
+              Daftar ke Praktik Mandiri
             </Button>
-          ) : null}
+            {nakes.alamatGoogleMaps ? (
+              <Button
+                type="button"
+                variant="outline"
+                className="h-11 w-full border-emerald-200 text-emerald-700 hover:bg-emerald-50"
+                onClick={() => window.open(nakes.alamatGoogleMaps as string, '_blank', 'noopener,noreferrer')}
+              >
+                <Navigation className="size-4" aria-hidden />
+                Buka di Google Maps
+              </Button>
+            ) : null}
+          </div>
+          <p className="mt-2 text-center text-[11px] text-gray-400 sm:text-left">
+            Pendaftaran praktik mandiri diproses melalui platform {ESIMANTRI_LABEL}.
+          </p>
         </div>
 
         {/* Footer hint */}
         <div className="rounded-b-lg border-t bg-gray-50 px-6 py-3 text-center">
           <p className="flex items-center justify-center gap-1.5 text-xs text-gray-400">
             <BadgeCheck className="size-3.5" aria-hidden />
-            Data tenaga kesehatan terverifikasi SIMANDAKES
+            Data praktik mandiri terverifikasi SIMANDAKES
           </p>
         </div>
       </DialogContent>

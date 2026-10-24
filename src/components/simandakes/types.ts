@@ -18,8 +18,8 @@ export interface Nakes {
   sip: string | null;
   alamatPraktik: string | null;
   jadwalPraktik: string | null;
-  noTelepon: string | null;
-  email: string | null;
+  /** Daftar layanan praktik mandiri — item dipisah baris baru/koma/titik-koma */
+  daftarLayanan: string | null;
   status: NakesStatus;
   fotoUrl: string | null;
   alamatGoogleMaps: string | null;

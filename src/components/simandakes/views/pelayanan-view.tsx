@@ -8,7 +8,7 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { CalendarDays, MapPin, Phone, RotateCcw, Search } from 'lucide-react';
+import { CalendarDays, ExternalLink, Home, ListChecks, MapPin, RotateCcw, Search } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import {
@@ -20,6 +20,7 @@ import {
 } from '@/components/ui/select';
 import { fetchNakes, fetchStats } from '../api';
 import { getProfesiConfig, getStatusBadge, PROFESI_QUICK_STATS } from '../profesi';
+import { ESIMANTRI_URL, parseDaftarLayanan } from '../config';
 import { EmptyState } from '../empty-state';
 import { NakesAvatar } from '../nakes-avatar';
 import { NakesDetailDialog } from '../nakes-detail-dialog';
@@ -68,7 +69,7 @@ export function PelayananView({ viewId, jenisList, title, subtitle, emoji, prima
       if (!jenisSet.has(n.jenis)) return false;
       if (statusFilter !== 'semua' && n.status !== statusFilter) return false;
       if (q) {
-        const hay = `${n.nama} ${n.spesialisasi ?? ''} ${n.alamatPraktik ?? ''}`.toLowerCase();
+        const hay = `${n.nama} ${n.spesialisasi ?? ''} ${n.alamatPraktik ?? ''} ${n.daftarLayanan ?? ''}`.toLowerCase();
         if (!hay.includes(q)) return false;
       }
       return true;
@@ -100,7 +101,13 @@ export function PelayananView({ viewId, jenisList, title, subtitle, emoji, prima
           </div>
           <div className="min-w-0">
             <h2 className="truncate text-xl font-bold text-gray-900 sm:text-2xl">{title}</h2>
-            <p className="truncate text-sm text-gray-500">{subtitle}</p>
+            <div className="mt-0.5 flex flex-wrap items-center gap-x-2 gap-y-1">
+              <span className="truncate text-sm text-gray-500">{subtitle}</span>
+              <span className="inline-flex items-center gap-1 rounded-full border border-emerald-200 bg-emerald-50 px-2 py-0.5 text-[10px] font-medium text-emerald-700">
+                <Home className="size-3" aria-hidden />
+                Data Praktik Mandiri
+              </span>
+            </div>
           </div>
         </div>
         <div className="flex gap-3">
@@ -159,7 +166,7 @@ export function PelayananView({ viewId, jenisList, title, subtitle, emoji, prima
               type="text"
               value={searchInput}
               onChange={(e) => setSearchInput(e.target.value)}
-              placeholder="Cari nama, spesialisasi, atau alamat..."
+              placeholder="Cari nama, layanan, atau alamat..."
               aria-label="Cari tenaga kesehatan"
               className="h-11 w-full rounded-xl border border-gray-200 pr-4 pl-11 text-sm outline-none transition-colors placeholder:text-gray-400 focus:border-emerald-400 focus:ring-2 focus:ring-emerald-500/20"
             />
@@ -218,67 +225,110 @@ export function PelayananView({ viewId, jenisList, title, subtitle, emoji, prima
           {filtered.map((n) => {
             const config = getProfesiConfig(n.jenis);
             const statusBadge = getStatusBadge(n.status);
+            const layanan = parseDaftarLayanan(n.daftarLayanan);
+            const layananPreview = layanan.slice(0, 3);
+            const layananMore = layanan.length - layananPreview.length;
             return (
-              <button
+              <article
                 key={n.id}
-                type="button"
-                onClick={() => setSelected(n)}
-                className="group overflow-hidden rounded-2xl border border-gray-100 bg-white text-left shadow-sm transition-all hover:-translate-y-1 hover:border-gray-200 hover:shadow-lg"
-                style={{ ['--accent' as string]: config.color }}
-                title={`Klik untuk lihat detail ${config.label}`}
+                className="group overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm transition-all hover:-translate-y-1 hover:border-gray-200 hover:shadow-lg"
               >
-                {/* Card top: avatar + badges */}
-                <div
-                  className="flex items-center gap-3.5 px-5 pt-5 pb-3"
-                  style={{ background: `linear-gradient(135deg, ${config.bg}, #ffffff)` }}
+                {/* Clickable area → opens detail dialog */}
+                <button
+                  type="button"
+                  onClick={() => setSelected(n)}
+                  className="block w-full text-left"
+                  title={`Klik untuk lihat detail ${config.label}`}
                 >
-                  <NakesAvatar nama={n.nama} jenis={n.jenis} fotoUrl={n.fotoUrl} status={n.status} size={64} />
-                  <div className="flex min-w-0 flex-1 flex-col items-start gap-1.5">
-                    <span
-                      className="inline-flex max-w-full items-center truncate rounded-full px-2 py-0.5 text-[10px] font-medium"
-                      style={{ background: config.bg, color: config.color }}
-                    >
-                      {config.icon} {config.label}
-                    </span>
-                    <span
-                      className={cn(
-                        'inline-flex items-center gap-1.5 rounded-full border px-2 py-0.5 text-[10px] font-medium',
-                        statusBadge.className
+                  {/* Card top: avatar + badges */}
+                  <div
+                    className="flex items-center gap-3.5 px-5 pt-5 pb-3"
+                    style={{ background: `linear-gradient(135deg, ${config.bg}, #ffffff)` }}
+                  >
+                    <NakesAvatar nama={n.nama} jenis={n.jenis} fotoUrl={n.fotoUrl} status={n.status} size={64} />
+                    <div className="flex min-w-0 flex-1 flex-col items-start gap-1.5">
+                      <span
+                        className="inline-flex max-w-full items-center truncate rounded-full px-2 py-0.5 text-[10px] font-medium"
+                        style={{ background: config.bg, color: config.color }}
+                      >
+                        {config.icon} {config.label}
+                      </span>
+                      <span
+                        className={cn(
+                          'inline-flex items-center gap-1.5 rounded-full border px-2 py-0.5 text-[10px] font-medium',
+                          statusBadge.className
+                        )}
+                      >
+                        <span className={cn('size-1.5 rounded-full', statusBadge.dotClassName)} aria-hidden />
+                        {statusBadge.label}
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Card body */}
+                  <div className="px-5 pt-3 pb-4">
+                    <h3 className="truncate text-base font-semibold text-gray-900">{n.nama || 'Tanpa Nama'}</h3>
+                    <p className="mt-0.5 truncate text-sm font-medium" style={{ color: config.color }}>
+                      {n.spesialisasi || '-'}
+                    </p>
+                    <p className="mt-1.5 inline-flex items-center gap-1.5 text-[11px] font-medium text-emerald-700">
+                      <Home className="size-3 shrink-0" aria-hidden />
+                      Praktik Mandiri
+                    </p>
+                    <div className="mt-2.5 space-y-1.5 text-xs text-gray-500">
+                      <p className="flex items-center gap-2">
+                        <MapPin className="size-3.5 shrink-0 text-gray-400" aria-hidden />
+                        <span className="truncate">{n.alamatPraktik || '-'}</span>
+                      </p>
+                      <p className="flex items-center gap-2">
+                        <CalendarDays className="size-3.5 shrink-0 text-gray-400" aria-hidden />
+                        <span className="truncate">{n.jadwalPraktik || '-'}</span>
+                      </p>
+                    </div>
+
+                    {/* Daftar Layanan preview (menggantikan telepon) */}
+                    <div className="mt-3 border-t border-dashed border-gray-100 pt-2.5">
+                      <p className="flex items-center gap-1.5 text-[10px] font-medium tracking-wide text-gray-400 uppercase">
+                        <ListChecks className="size-3 shrink-0" aria-hidden />
+                        Daftar Layanan
+                      </p>
+                      {layananPreview.length > 0 ? (
+                        <div className="mt-1.5 flex flex-wrap gap-1">
+                          {layananPreview.map((item) => (
+                            <span
+                              key={item}
+                              className="inline-flex max-w-full items-center rounded-full bg-emerald-50 px-2 py-0.5 text-[10px] font-medium text-emerald-800"
+                            >
+                              <span className="truncate">{item}</span>
+                            </span>
+                          ))}
+                          {layananMore > 0 ? (
+                            <span className="inline-flex items-center rounded-full bg-gray-100 px-2 py-0.5 text-[10px] font-medium text-gray-500">
+                              +{layananMore} lainnya
+                            </span>
+                          ) : null}
+                        </div>
+                      ) : (
+                        <p className="mt-1 text-[11px] text-gray-400">Belum ada layanan</p>
                       )}
-                    >
-                      <span className={cn('size-1.5 rounded-full', statusBadge.dotClassName)} aria-hidden />
-                      {statusBadge.label}
-                    </span>
+                    </div>
                   </div>
-                </div>
+                </button>
 
-                {/* Card body */}
-                <div className="px-5 pt-3 pb-4">
-                  <h3 className="truncate text-base font-semibold text-gray-900">{n.nama || 'Tanpa Nama'}</h3>
-                  <p className="mt-0.5 truncate text-sm font-medium" style={{ color: config.color }}>
-                    {n.spesialisasi || '-'}
-                  </p>
-                  <div className="mt-3 space-y-1.5 text-xs text-gray-500">
-                    <p className="flex items-center gap-2">
-                      <MapPin className="size-3.5 shrink-0 text-gray-400" aria-hidden />
-                      <span className="truncate">{n.alamatPraktik || '-'}</span>
-                    </p>
-                    <p className="flex items-center gap-2">
-                      <CalendarDays className="size-3.5 shrink-0 text-gray-400" aria-hidden />
-                      <span className="truncate">{n.jadwalPraktik || '-'}</span>
-                    </p>
-                    <p className="flex items-center gap-2">
-                      <Phone className="size-3.5 shrink-0 text-gray-400" aria-hidden />
-                      <span className="truncate">{n.noTelepon || '-'}</span>
-                    </p>
-                  </div>
+                {/* Card footer: CTA daftar praktik mandiri (e-Simantri) */}
+                <div className="border-t border-gray-100 bg-gray-50 p-3">
+                  <a
+                    href={ESIMANTRI_URL}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex h-10 w-full items-center justify-center gap-2 rounded-xl bg-emerald-600 px-4 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-emerald-700 focus-visible:ring-2 focus-visible:ring-emerald-500/40 focus-visible:outline-none"
+                    aria-label={`Daftar ke praktik mandiri melalui platform e-Simantri`}
+                  >
+                    <ExternalLink className="size-4" aria-hidden />
+                    Daftar ke Praktik Mandiri
+                  </a>
                 </div>
-
-                {/* Card footer hint */}
-                <div className="border-t border-gray-100 bg-gray-50 py-2.5 text-center text-[11px] text-gray-400 transition-colors group-hover:text-gray-500">
-                  👆 Klik untuk detail lengkap
-                </div>
-              </button>
+              </article>
             );
           })}
         </div>
