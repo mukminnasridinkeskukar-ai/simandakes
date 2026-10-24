@@ -1,0 +1,72 @@
+// SIMANDAKES — Sistem Informasi dan Manajemen SDM Kesehatan
+// Prisma schema (SQLite) — replaces the demo User/Post models.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           String    @id @default(cuid())
+  username     String    @unique
+  passwordHash String
+  namaLengkap  String
+  role         String    @default("operator") // admin | operator | viewer
+  email        String?
+  status       String    @default("aktif") // aktif | nonaktif | suspended
+  lastLoginAt  DateTime?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+}
+
+model DataNakes {
+  id               String   @id @default(cuid())
+  nama             String
+  jenis            String   @default("Tenaga Kesehatan Lainnya")
+  spesialisasi     String?
+  str              String?
+  sip              String?
+  alamatPraktik    String?
+  jadwalPraktik    String?
+  noTelepon        String?
+  email            String?
+  status           String   @default("aktif")
+  fotoUrl          String?
+  alamatGoogleMaps String?
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  @@index([jenis])
+  @@index([status])
+  @@index([nama])
+}
+
+model InstitusiNamed {
+  id         String   @id @default(cuid())
+  nama       String
+  tipe       String   @default("Lainnya") // RS | Puskesmas | Klinik | Apotek | Lainnya
+  dokter     Int      @default(0)
+  dokterGigi Int      @default(0)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@index([tipe])
+}
+
+model InstitusiNakes {
+  id        String   @id @default(cuid())
+  nama      String
+  tipe      String   @default("Lainnya")
+  perawat   Int      @default(0)
+  bidan     Int      @default(0)
+  apoteker  Int      @default(0)
+  lainnya   Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([tipe])
+}
