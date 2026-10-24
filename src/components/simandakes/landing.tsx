@@ -11,6 +11,7 @@ import {
   Activity,
   ArrowRight,
   Award,
+  Download,
   BadgeCheck,
   Baby,
   Building2,
@@ -446,6 +447,19 @@ export function LandingPage() {
                 </Button>
                 <Button
                   variant="outline"
+                  className="h-12 border-white bg-white/10 px-6 text-base font-semibold text-white hover:bg-white hover:text-emerald-700"
+                  asChild
+                >
+                  <a href="/simandakes-nextjs.zip" download="simandakes-nextjs.zip">
+                    <Download className="size-5" aria-hidden />
+                    Unduh ZIP Proyek
+                    <span className="rounded-full bg-white/20 px-2 py-0.5 text-xs font-medium">
+                      1.1 MB
+                    </span>
+                  </a>
+                </Button>
+                <Button
+                  variant="outline"
                   className="h-12 border-white/60 bg-transparent px-6 text-base text-white hover:bg-white/10 hover:text-white"
                   asChild
                 >
@@ -535,7 +549,15 @@ export function LandingPage() {
           </div>
           <div className="flex flex-col items-center justify-between gap-3 border-t border-white/10 py-6 text-xs sm:flex-row">
             <p>© 2024 SIMANDAKES — Dinas Kesehatan. Hak Cipta Dilindungi.</p>
-            <div className="flex gap-6">
+            <div className="flex flex-wrap items-center justify-center gap-6">
+              <a
+                href="/simandakes-nextjs.zip"
+                download="simandakes-nextjs.zip"
+                className="inline-flex items-center gap-1.5 font-medium text-emerald-400 transition-colors hover:text-emerald-300"
+              >
+                <Download className="size-3.5" aria-hidden />
+                Unduh Kode Sumber (ZIP)
+              </a>
               <span className="cursor-default transition-colors hover:text-gray-300">Kebijakan Privasi</span>
               <span className="cursor-default transition-colors hover:text-gray-300">Syarat &amp; Ketentuan</span>
             </div>
