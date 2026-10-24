@@ -22,7 +22,7 @@ import { fetchNakes, fetchStats } from '../api';
 import { getProfesiConfig, getStatusBadge, PROFESI_QUICK_STATS } from '../profesi';
 import { ESIMANTRI_URL, parseDaftarLayanan } from '../config';
 import { EmptyState } from '../empty-state';
-import { NakesAvatar } from '../nakes-avatar';
+import { NakesPhotoBanner } from '../nakes-photo';
 import { NakesDetailDialog } from '../nakes-detail-dialog';
 import { CardGridSkeleton } from '../view-skeleton';
 import { useSimandakesStore, type StatusFilter } from '../store';
@@ -240,38 +240,43 @@ export function PelayananView({ viewId, jenisList, title, subtitle, emoji, prima
                   className="block w-full text-left"
                   title={`Klik untuk lihat detail ${config.label}`}
                 >
-                  {/* Card top: avatar + badges */}
-                  <div
-                    className="flex items-center gap-3.5 px-5 pt-5 pb-3"
-                    style={{ background: `linear-gradient(135deg, ${config.bg}, #ffffff)` }}
+                  {/* FOTO PROFIL — bagian atas kartu */}
+                  <NakesPhotoBanner
+                    nama={n.nama}
+                    jenis={n.jenis}
+                    fotoUrl={n.fotoUrl}
+                    className="h-44 sm:h-48"
+                    overlay
                   >
-                    <NakesAvatar nama={n.nama} jenis={n.jenis} fotoUrl={n.fotoUrl} status={n.status} size={64} />
-                    <div className="flex min-w-0 flex-1 flex-col items-start gap-1.5">
-                      <span
-                        className="inline-flex max-w-full items-center truncate rounded-full px-2 py-0.5 text-[10px] font-medium"
-                        style={{ background: config.bg, color: config.color }}
-                      >
-                        {config.icon} {config.label}
-                      </span>
-                      <span
-                        className={cn(
-                          'inline-flex items-center gap-1.5 rounded-full border px-2 py-0.5 text-[10px] font-medium',
-                          statusBadge.className
-                        )}
-                      >
-                        <span className={cn('size-1.5 rounded-full', statusBadge.dotClassName)} aria-hidden />
-                        {statusBadge.label}
-                      </span>
+                    {/* chip profesi (kiri-atas) */}
+                    <span
+                      className="pointer-events-none absolute top-3 left-3 inline-flex max-w-[62%] items-center truncate rounded-full bg-white/90 px-2.5 py-1 text-[10px] font-semibold shadow-sm backdrop-blur-sm"
+                      style={{ color: config.color }}
+                    >
+                      {config.icon} {config.label}
+                    </span>
+                    {/* badge status (kanan-atas) */}
+                    <span
+                      className={cn(
+                        'pointer-events-none absolute top-3 right-3 inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[10px] font-medium shadow-sm backdrop-blur-sm',
+                        statusBadge.className
+                      )}
+                    >
+                      <span className={cn('size-1.5 rounded-full', statusBadge.dotClassName)} aria-hidden />
+                      {statusBadge.label}
+                    </span>
+                    {/* nama + spesialisasi (overlay bawah foto) */}
+                    <div className="pointer-events-none absolute inset-x-0 bottom-0 px-4 pt-8 pb-3.5 text-left">
+                      <h3 className="truncate text-lg font-bold text-white drop-shadow-sm">{n.nama || 'Tanpa Nama'}</h3>
+                      <p className="mt-0.5 truncate text-sm font-medium text-white/90 drop-shadow-sm">
+                        {n.spesialisasi || config.label}
+                      </p>
                     </div>
-                  </div>
+                  </NakesPhotoBanner>
 
                   {/* Card body */}
-                  <div className="px-5 pt-3 pb-4">
-                    <h3 className="truncate text-base font-semibold text-gray-900">{n.nama || 'Tanpa Nama'}</h3>
-                    <p className="mt-0.5 truncate text-sm font-medium" style={{ color: config.color }}>
-                      {n.spesialisasi || '-'}
-                    </p>
-                    <p className="mt-1.5 inline-flex items-center gap-1.5 text-[11px] font-medium text-emerald-700">
+                  <div className="px-5 pt-3.5 pb-4">
+                    <p className="inline-flex items-center gap-1.5 text-[11px] font-medium text-emerald-700">
                       <Home className="size-3 shrink-0" aria-hidden />
                       Praktik Mandiri
                     </p>

@@ -34,6 +34,7 @@ import { Button } from '@/components/ui/button';
 import { fetchNakes, fetchStats } from './api';
 import { useSimandakesStore } from './store';
 import { getProfesiConfig } from './profesi';
+import { NakesAvatar } from './nakes-avatar';
 import type { Stats, ViewId } from './types';
 
 const CONTAINER = 'mx-auto w-full max-w-6xl px-4 sm:px-6 lg:px-8';
@@ -280,24 +281,12 @@ export function LandingPage() {
                         ))
                       : topAktif.map((n) => {
                           const config = getProfesiConfig(n.jenis);
-                          const initials = n.nama
-                            .split(' ')
-                            .map((w) => w.charAt(0))
-                            .join('')
-                            .slice(0, 2)
-                            .toUpperCase();
                           return (
                             <div
                               key={n.id}
                               className="flex items-center gap-3 rounded-xl bg-gray-50/60 px-3 py-2.5 transition-colors hover:bg-gray-50"
                             >
-                              <div
-                                className="flex size-9 shrink-0 items-center justify-center rounded-full text-xs font-bold"
-                                style={{ background: config.bg, color: config.color }}
-                                aria-hidden
-                              >
-                                {initials}
-                              </div>
+                              <NakesAvatar nama={n.nama} jenis={n.jenis} fotoUrl={n.fotoUrl} size={36} />
                               <div className="min-w-0 flex-1">
                                 <p className="truncate text-sm font-semibold text-gray-900">{n.nama}</p>
                                 <p className="truncate text-xs text-gray-500">{n.spesialisasi || config.label}</p>

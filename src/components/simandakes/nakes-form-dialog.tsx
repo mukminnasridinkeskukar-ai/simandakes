@@ -220,8 +220,9 @@ function NakesForm({ initial, onOpenChange }: { initial: Nakes | null; onOpenCha
                 rows={3}
               />
             </Field>
-            <Field label="URL Foto">
-              <Input value={form.fotoUrl} onChange={(e) => set('fotoUrl', e.target.value)} placeholder="https://..." className="h-10" />
+            <Field label="URL Foto Profil">
+              <Input value={form.fotoUrl} onChange={(e) => set('fotoUrl', e.target.value)} placeholder="/foto/nakes-01.jpg atau https://..." className="h-10" />
+              <p className="text-[11px] text-gray-400">Kosongkan untuk menampilkan avatar inisial.</p>
             </Field>
             <Field label="URL Google Maps">
               <Input value={form.alamatGoogleMaps} onChange={(e) => set('alamatGoogleMaps', e.target.value)} placeholder="https://maps.google.com/..." className="h-10" />
