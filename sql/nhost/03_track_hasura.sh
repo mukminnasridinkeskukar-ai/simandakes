@@ -20,9 +20,12 @@
 #
 # Yang dilakukan skrip ini (idempoten — aman dijalankan berulang):
 #   1. pg_track_table untuk 3 tabel (menghilangkan UNTRACKED_TABLE)
-#   2. SELECT permission untuk role `anonymous` (baca publik, app.js tanpa
-#      admin secret) dan role `user`
-#   3. INSERT/UPDATE/DELETE permission untuk role `user` (kelola data)
+#   2. SELECT permission untuk role `public` (WAJIB — aplikasi SIMANDAKES
+#      mengirim request TANPA admin secret, jadi Hasura memakai role
+#      unauthorized bawaan Nhost yaitu "public"), plus `anonymous` & `user`
+#   3. INSERT/UPDATE permission untuk role `public` (fitur kelola data di
+#      admin dashboard app.js) dan role `user`; DELETE hanya role `user`
+#      (app.js memakai soft-delete via UPDATE deleted_at)
 #   4. reload_metadata
 #   5. Verifikasi: hitung data_nakes via GraphQL
 # ============================================================================
@@ -65,30 +68,35 @@ for t in "${TABLES[@]}"; do
     || FAILED=1
 done
 
-echo "== 2/4 Permission SELECT (anonymous + user) =="
+echo "== 2/5 Permission SELECT (public + anonymous + user) =="
 for t in "${TABLES[@]}"; do
-  run_op "select anonymous -> $t" \
-    "{\"type\":\"pg_create_select_permission\",\"args\":{\"source\":\"default\",\"table\":{\"schema\":\"public\",\"name\":\"$t\"},\"role\":\"anonymous\",\"permission\":{\"columns\":\"*\",\"filter\":{},\"allow_aggregations\":true}}}" \
-    || FAILED=1
-  run_op "select user -> $t" \
-    "{\"type\":\"pg_create_select_permission\",\"args\":{\"source\":\"default\",\"table\":{\"schema\":\"public\",\"name\":\"$t\"},\"role\":\"user\",\"permission\":{\"columns\":\"*\",\"filter\":{},\"allow_aggregations\":true}}}" \
-    || FAILED=1
+  for r in public anonymous user; do
+    run_op "select $r -> $t" \
+      "{\"type\":\"pg_create_select_permission\",\"args\":{\"source\":\"default\",\"table\":{\"schema\":\"public\",\"name\":\"$t\"},\"role\":\"$r\",\"permission\":{\"columns\":\"*\",\"filter\":{},\"allow_aggregations\":true}}}" \
+      || FAILED=1
+  done
 done
 
-echo "== 3/4 Permission tulis (user) =="
+echo "== 3/5 Permission INSERT + UPDATE (public + user) — fitur kelola data app.js =="
 for t in "${TABLES[@]}"; do
-  run_op "insert user -> $t" \
-    "{\"type\":\"pg_create_insert_permission\",\"args\":{\"source\":\"default\",\"table\":{\"schema\":\"public\",\"name\":\"$t\"},\"role\":\"user\",\"permission\":{\"columns\":\"*\",\"check\":{}}}}" \
-    || FAILED=1
-  run_op "update user -> $t" \
-    "{\"type\":\"pg_create_update_permission\",\"args\":{\"source\":\"default\",\"table\":{\"schema\":\"public\",\"name\":\"$t\"},\"role\":\"user\",\"permission\":{\"columns\":\"*\",\"filter\":{},\"check\":{}}}}" \
-    || FAILED=1
+  for r in public user; do
+    run_op "insert $r -> $t" \
+      "{\"type\":\"pg_create_insert_permission\",\"args\":{\"source\":\"default\",\"table\":{\"schema\":\"public\",\"name\":\"$t\"},\"role\":\"$r\",\"permission\":{\"columns\":\"*\",\"check\":{}}}}" \
+      || FAILED=1
+    run_op "update $r -> $t" \
+      "{\"type\":\"pg_create_update_permission\",\"args\":{\"source\":\"default\",\"table\":{\"schema\":\"public\",\"name\":\"$t\"},\"role\":\"$r\",\"permission\":{\"columns\":\"*\",\"filter\":{},\"check\":{}}}}" \
+      || FAILED=1
+  done
+done
+
+echo "== 4/5 Permission DELETE (user saja — app.js memakai soft-delete via update) =="
+for t in "${TABLES[@]}"; do
   run_op "delete user -> $t" \
     "{\"type\":\"pg_create_delete_permission\",\"args\":{\"source\":\"default\",\"table\":{\"schema\":\"public\",\"name\":\"$t\"},\"role\":\"user\",\"permission\":{\"filter\":{}}}}" \
     || FAILED=1
 done
 
-echo "== 4/4 Reload metadata =="
+echo "== 5/5 Reload metadata =="
 run_op "reload_metadata" \
   '{"type":"reload_metadata","args":{"source":"default","reload_connections":true,"reload_remote_schemas":true}}' \
   || FAILED=1
@@ -112,5 +120,5 @@ if [ "$FAILED" -ne 0 ]; then
 fi
 echo
 echo "Selesai. Field GraphQL kini tersedia di query_root:"
-echo "  query { data_nakes { id nama jenis daftar_layanan foto_url } }"
-echo "  -> refresh app.js Anda; error UNTRACKED_TABLE harusnya hilang."
+echo "  query { data_nakes(where: { deleted_at: { _is_null: true } }) { legacy_id nama jenis daftar_layanan foto_url } }"
+echo "  -> refresh aplikasi Anda; error UNTRACKED_TABLE harusnya hilang."
