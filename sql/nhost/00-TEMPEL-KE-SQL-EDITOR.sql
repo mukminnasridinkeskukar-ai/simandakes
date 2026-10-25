@@ -31,6 +31,11 @@
 --      { data_nakes(where: { deleted_at: { _is_null: true } }) { legacy_id nama foto_url } }
 --    Harus muncul 21 baris dengan foto /foto/nakes-01.jpg s/d nakes-21.jpg
 --
+--  ⚠️ POPUP MERAH "Tracking items failed — set_updated_at"? ITU NORMAL!
+--     Hasura mencoba men-track fungsi trigger (memang tidak bisa di-track,
+--     dan TIDAK diperlukan). SQL & datamu tetap sukses masuk. Klik saja (X),
+--     lalu LANJUT ke LANGKAH 2 (track 3 tabel lewat menu Data).
+--
 --  PENTING: aplikasi SIMANDAKES membaca Nhost TANPA password (tanpa admin
 --  secret), jadi Hasura memakai role "public" — itulah kenapa LANGKAH 3
 --  membuat permission untuk role "public". Tanpa ini aplikasi tampil kosong.

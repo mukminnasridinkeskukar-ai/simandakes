@@ -364,7 +364,7 @@ export function DashboardShell() {
 
       {/* ==================== Sidebar (mobile Sheet) ==================== */}
       <Sheet open={sidebarOpen} onOpenChange={setSidebarOpen}>
-        <SheetContent aria-describedby={undefined} side="left" className="w-80 max-w-[85vw] gap-0 overflow-hidden p-0">
+        <SheetContent side="left" className="w-80 max-w-[85vw] gap-0 overflow-hidden p-0">
           <SheetHeader className="h-16 shrink-0 justify-center border-b px-4 py-0">
             <SheetTitle asChild>
               <div>

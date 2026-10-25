@@ -45,7 +45,8 @@ interface NakesFormState {
   sip: string;
   alamatPraktik: string;
   jadwalPraktik: string;
-  daftarLayanan: string;
+  noTelepon: string;
+  email: string;
   status: NakesStatus;
   fotoUrl: string;
   alamatGoogleMaps: string;
@@ -59,7 +60,8 @@ const DEFAULT_FORM: NakesFormState = {
   sip: '',
   alamatPraktik: '',
   jadwalPraktik: '',
-  daftarLayanan: '',
+  noTelepon: '',
+  email: '',
   status: 'aktif',
   fotoUrl: '',
   alamatGoogleMaps: '',
@@ -76,7 +78,8 @@ function toFormState(nakes: Nakes): NakesFormState {
     sip: nakes.sip ?? '',
     alamatPraktik: nakes.alamatPraktik ?? '',
     jadwalPraktik: nakes.jadwalPraktik ?? '',
-    daftarLayanan: nakes.daftarLayanan ?? '',
+    noTelepon: nakes.noTelepon ?? '',
+    email: nakes.email ?? '',
     status: nakes.status,
     fotoUrl: nakes.fotoUrl ?? '',
     alamatGoogleMaps: nakes.alamatGoogleMaps ?? '',
@@ -147,7 +150,8 @@ function NakesForm({ initial, onOpenChange }: { initial: Nakes | null; onOpenCha
       sip: orNull(form.sip),
       alamatPraktik: orNull(form.alamatPraktik),
       jadwalPraktik: orNull(form.jadwalPraktik),
-      daftarLayanan: orNull(form.daftarLayanan),
+      noTelepon: orNull(form.noTelepon),
+      email: orNull(form.email),
       status: form.status,
       fotoUrl: orNull(form.fotoUrl),
       alamatGoogleMaps: orNull(form.alamatGoogleMaps),
@@ -206,23 +210,20 @@ function NakesForm({ initial, onOpenChange }: { initial: Nakes | null; onOpenCha
             <Field label="No. SIP">
               <Input value={form.sip} onChange={(e) => set('sip', e.target.value)} placeholder="SIP123..." className="h-10" />
             </Field>
+            <Field label="No. Telepon">
+              <Input value={form.noTelepon} onChange={(e) => set('noTelepon', e.target.value)} placeholder="0812..." className="h-10" />
+            </Field>
+            <Field label="Email">
+              <Input type="email" value={form.email} onChange={(e) => set('email', e.target.value)} placeholder="nama@email.com" className="h-10" />
+            </Field>
             <Field label="Alamat Praktik">
               <Textarea value={form.alamatPraktik} onChange={(e) => set('alamatPraktik', e.target.value)} placeholder="Alamat tempat praktik" rows={2} />
             </Field>
             <Field label="Jadwal Praktik">
               <Textarea value={form.jadwalPraktik} onChange={(e) => set('jadwalPraktik', e.target.value)} placeholder="Senin–Jumat, 08.00–14.00" rows={2} />
             </Field>
-            <Field label="Daftar Layanan Praktik Mandiri">
-              <Textarea
-                value={form.daftarLayanan}
-                onChange={(e) => set('daftarLayanan', e.target.value)}
-                placeholder={'Satu layanan per baris, misalnya:\nKonsultasi Umum\nMedical Check-up\nSuntik & Vitamin'}
-                rows={3}
-              />
-            </Field>
-            <Field label="URL Foto Profil">
-              <Input value={form.fotoUrl} onChange={(e) => set('fotoUrl', e.target.value)} placeholder="/foto/nakes-01.jpg atau https://..." className="h-10" />
-              <p className="text-[11px] text-gray-400">Kosongkan untuk menampilkan avatar inisial.</p>
+            <Field label="URL Foto">
+              <Input value={form.fotoUrl} onChange={(e) => set('fotoUrl', e.target.value)} placeholder="https://..." className="h-10" />
             </Field>
             <Field label="URL Google Maps">
               <Input value={form.alamatGoogleMaps} onChange={(e) => set('alamatGoogleMaps', e.target.value)} placeholder="https://maps.google.com/..." className="h-10" />

@@ -32,7 +32,8 @@ model DataNakes {
   sip              String?
   alamatPraktik    String?
   jadwalPraktik    String?
-  daftarLayanan    String? // item dipisah baris baru/koma/titik-koma
+  noTelepon        String?
+  email            String?
   status           String   @default("aktif")
   fotoUrl          String?
   alamatGoogleMaps String?

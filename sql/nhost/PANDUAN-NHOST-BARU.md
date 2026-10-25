@@ -45,6 +45,13 @@ tidak diperlukan — data terbaru ada di file SQL langkah 3.
 > **21 praktik mandiri lengkap dengan FOTO + DAFTAR LAYANAN**,
 > 8 institusi Named, 8 institusi Nakes.
 
+> ⚠️ **Popup merah "Tracking items failed — set_updated_at" itu NORMAL —
+> abaikan saja!** Itu cuma Hasura mencoba men-track fungsi trigger
+> `set_updated_at` (fungsi trigger memang tidak bisa di-track dan tidak
+> diperlukan). SQL & data Anda TETAP sukses masuk — tidak ada yang rusak.
+> Efeknya: track tabel ikut batal (gagal 1 = gagal paket), jadi WAJIB
+> lanjut ke langkah 4 di bawah untuk men-track 3 tabel secara manual.
+
 ---
 
 ## 4️⃣ Track tabel di Hasura — supaya muncul di GraphQL

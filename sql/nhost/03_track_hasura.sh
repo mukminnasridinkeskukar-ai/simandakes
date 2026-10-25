@@ -47,7 +47,7 @@ run_op() {
   local desc="$1" payload="$2" resp
   resp="$(meta "$payload")"
   if echo "$resp" | grep -q '"error"'; then
-    if echo "$resp" | grep -qiE 'already tracked|already exists'; then
+    if echo "$resp" | grep -qiE 'already tracked|already exists|already defined'; then
       echo "SKIP : $desc (sudah ada)"
     else
       echo "GAGAL: $desc"
@@ -102,15 +102,18 @@ run_op "reload_metadata" \
   || FAILED=1
 
 echo
-echo "== Verifikasi GraphQL =="
+echo "== Verifikasi GraphQL (aggregate, role admin) =="
+GRAPHQL_ENDPOINT="${HASURA_ENDPOINT%/v1/metadata}/v1/graphql"
 for t in "${TABLES[@]}"; do
-  resp="$(meta "{\"type\":\"run_sql\",\"args\":{\"source\":\"default\",\"sql\":\"select count(*) from public.$t\"}}")"
-  if echo "$resp" | grep -q '"error"'; then
+  resp="$(curl -sS --max-time 30 -X POST "$GRAPHQL_ENDPOINT" \
+    -H 'Content-Type: application/json' \
+    -H "x-hasura-admin-secret: $HASURA_ADMIN_SECRET" \
+    -d "{\"query\":\"{ ${t}_aggregate { aggregate { count } } }\"}")"
+  count="$(echo "$resp" | grep -oE '"count"[ ]*:[ ]*[0-9]+' | grep -oE '[0-9]+' | tail -1)"
+  if [ -z "$count" ]; then
     echo "GAGAL baca $t:"; echo "$resp"; FAILED=1
   else
-    # ambil angka count dari hasil run_sql
-    count="$(echo "$resp" | grep -oE '"result":\[\["count","[0-9]+"\]\]' | grep -oE '[0-9]+' | tail -1)"
-    echo "public.$t : ${count:-?} baris"
+    echo "public.$t : $count baris"
   fi
 done
 

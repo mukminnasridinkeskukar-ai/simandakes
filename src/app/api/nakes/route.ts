@@ -37,7 +37,6 @@ export async function GET(request: NextRequest) {
         { nama: { contains: q } },
         { spesialisasi: { contains: q } },
         { alamatPraktik: { contains: q } },
-        { daftarLayanan: { contains: q } },
       ]
     }
 
@@ -104,7 +103,8 @@ export async function POST(request: NextRequest) {
         sip: toNullableString(body.sip),
         alamatPraktik: toNullableString(body.alamatPraktik),
         jadwalPraktik: toNullableString(body.jadwalPraktik),
-        daftarLayanan: toNullableString(body.daftarLayanan),
+        noTelepon: toNullableString(body.noTelepon),
+        email: toNullableString(body.email),
         fotoUrl: toNullableString(body.fotoUrl),
         alamatGoogleMaps: toNullableString(body.alamatGoogleMaps),
       },

@@ -11,7 +11,6 @@ import {
   Activity,
   ArrowRight,
   Award,
-  Download,
   BadgeCheck,
   Baby,
   Building2,
@@ -35,7 +34,6 @@ import { Button } from '@/components/ui/button';
 import { fetchNakes, fetchStats } from './api';
 import { useSimandakesStore } from './store';
 import { getProfesiConfig } from './profesi';
-import { NakesAvatar } from './nakes-avatar';
 import type { Stats, ViewId } from './types';
 
 const CONTAINER = 'mx-auto w-full max-w-6xl px-4 sm:px-6 lg:px-8';
@@ -282,12 +280,24 @@ export function LandingPage() {
                         ))
                       : topAktif.map((n) => {
                           const config = getProfesiConfig(n.jenis);
+                          const initials = n.nama
+                            .split(' ')
+                            .map((w) => w.charAt(0))
+                            .join('')
+                            .slice(0, 2)
+                            .toUpperCase();
                           return (
                             <div
                               key={n.id}
                               className="flex items-center gap-3 rounded-xl bg-gray-50/60 px-3 py-2.5 transition-colors hover:bg-gray-50"
                             >
-                              <NakesAvatar nama={n.nama} jenis={n.jenis} fotoUrl={n.fotoUrl} size={36} />
+                              <div
+                                className="flex size-9 shrink-0 items-center justify-center rounded-full text-xs font-bold"
+                                style={{ background: config.bg, color: config.color }}
+                                aria-hidden
+                              >
+                                {initials}
+                              </div>
                               <div className="min-w-0 flex-1">
                                 <p className="truncate text-sm font-semibold text-gray-900">{n.nama}</p>
                                 <p className="truncate text-xs text-gray-500">{n.spesialisasi || config.label}</p>
@@ -447,19 +457,6 @@ export function LandingPage() {
                 </Button>
                 <Button
                   variant="outline"
-                  className="h-12 border-white bg-white/10 px-6 text-base font-semibold text-white hover:bg-white hover:text-emerald-700"
-                  asChild
-                >
-                  <a href="/simandakes-nextjs.zip" download="simandakes-nextjs.zip">
-                    <Download className="size-5" aria-hidden />
-                    Unduh ZIP Proyek
-                    <span className="rounded-full bg-white/20 px-2 py-0.5 text-xs font-medium">
-                      1.1 MB
-                    </span>
-                  </a>
-                </Button>
-                <Button
-                  variant="outline"
                   className="h-12 border-white/60 bg-transparent px-6 text-base text-white hover:bg-white/10 hover:text-white"
                   asChild
                 >
@@ -549,15 +546,7 @@ export function LandingPage() {
           </div>
           <div className="flex flex-col items-center justify-between gap-3 border-t border-white/10 py-6 text-xs sm:flex-row">
             <p>© 2024 SIMANDAKES — Dinas Kesehatan. Hak Cipta Dilindungi.</p>
-            <div className="flex flex-wrap items-center justify-center gap-6">
-              <a
-                href="/simandakes-nextjs.zip"
-                download="simandakes-nextjs.zip"
-                className="inline-flex items-center gap-1.5 font-medium text-emerald-400 transition-colors hover:text-emerald-300"
-              >
-                <Download className="size-3.5" aria-hidden />
-                Unduh Kode Sumber (ZIP)
-              </a>
+            <div className="flex gap-6">
               <span className="cursor-default transition-colors hover:text-gray-300">Kebijakan Privasi</span>
               <span className="cursor-default transition-colors hover:text-gray-300">Syarat &amp; Ketentuan</span>
             </div>

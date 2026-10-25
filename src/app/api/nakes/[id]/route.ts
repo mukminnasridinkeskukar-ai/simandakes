@@ -72,7 +72,8 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
       'sip',
       'alamatPraktik',
       'jadwalPraktik',
-      'daftarLayanan',
+      'noTelepon',
+      'email',
       'fotoUrl',
       'alamatGoogleMaps',
     ] as const
